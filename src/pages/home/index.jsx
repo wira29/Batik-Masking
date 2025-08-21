@@ -1,5 +1,5 @@
 import { Center, OrbitControls } from '@react-three/drei';
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
@@ -107,6 +107,11 @@ export default function Home() {
         setStageTexture(uri);
     };
 
+    function BackgroundImage({ src, width, height }) {
+        const [image] = useImage(src);
+        return <KonvaImage image={image} width={width} height={height} />;
+    }
+
     const imagesUrl = [
         '/batik/batik-1.jpg',
         '/batik/batik-2.jpg',
@@ -114,11 +119,11 @@ export default function Home() {
     ];
 
     return (
-        <div className="flex flex-row h-[100vh] w-full">
+        <div className="flex flex-row h-full w-max-[100vw] overflow-x-hidden">
             <div className="flex-2">
                 <Canvas camera={{ position: [0, 1, 3] }}>
-                    <ambientLight intensity={Math.PI / 2} />
-                    <directionalLight position={[2, 2, 5]} />
+                    <ambientLight intensity={1} />
+                    <directionalLight position={[5, 5, 5]} intensity={1.5} />
                     <OrbitControls />
                     <Center disableY={false}>
                         <ShirtObj textureUrl={stageTexture} />
@@ -130,20 +135,13 @@ export default function Home() {
                     <h6>Pilihan motif Batik</h6>
 
                     <div>
-                        <button onClick={applyTexture} style={{ marginTop: 10 }}>
+                        <button onClick={applyTexture} className='mt-5 p-3 bg-blue-500 text-white rounded-lg'>
                             Apply to 3D
                         </button>
                         Try to drag and drop the image into the stage:
                         <br />
-                        <img
-                            alt="lion"
-                            src="https://konvajs.org/assets/lion.png"
-                            draggable="true"
-                            onDragStart={(e) => {
-                                dragUrl.current = e.target.src;
-                            }}
-                        />
                         <div
+                            className='mt-5'
                             onDrop={(e) => {
                                 e.preventDefault();
 
@@ -172,14 +170,20 @@ export default function Home() {
                             onDragOver={(e) => e.preventDefault()}
                         >
                             <Stage
-                                width={800} // fixed width
-                                height={600} // fixed height
+                                width={512} // fixed width
+                                height={700} // fixed height
                                 style={{ border: '1px solid grey' }}
                                 ref={stageRef}
                                 onMouseDown={checkDeselect}
                                 onTouchStart={checkDeselect}
                             >
+
                                 <Layer>
+                                    <BackgroundImage
+                                        src={"/layouts/kemeja-panjang.png"}// path ke gambar
+                                        width={512}
+                                        height={700}
+                                    />
                                     {images.map((image, i) => {
                                         return <URLImage image={image} key={i}
                                             shapeProps={image}
@@ -204,10 +208,18 @@ export default function Home() {
 }
 
 function ShirtObj({ textureUrl }) {
-    const obj = useLoader(OBJLoader, "/model/new-shirt.obj");
+    const obj = useLoader(OBJLoader, "/model/uv-kemeja-upgrade.obj");
     const [texture, setTexture] = useState(null);
+    const { gl } = useThree();
 
-    // Convert base64 atau URL jadi THREE.Texture
+    // Atur renderer supaya support sRGB (versi baru)
+    useEffect(() => {
+        gl.outputColorSpace = THREE.SRGBColorSpace;
+        gl.toneMapping = THREE.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.0;
+    }, [gl]);
+
+    // Convert base64 / URL jadi THREE.Texture
     useEffect(() => {
         if (!textureUrl) return;
 
@@ -216,6 +228,7 @@ function ShirtObj({ textureUrl }) {
         img.src = textureUrl;
         img.onload = () => {
             const tex = new THREE.Texture(img);
+            tex.colorSpace = THREE.SRGBColorSpace; // versi baru
             tex.needsUpdate = true;
             setTexture(tex);
         };
@@ -224,11 +237,14 @@ function ShirtObj({ textureUrl }) {
     // Apply texture ke semua mesh
     useEffect(() => {
         if (!obj || !texture) return;
+
         obj.traverse((child) => {
             if (child.isMesh) {
                 child.material = new THREE.MeshStandardMaterial({
                     map: texture,
                     color: 0xffffff,
+                    metalness: 0.0,
+                    roughness: 1.0,
                 });
                 child.material.needsUpdate = true;
             }
