@@ -1,0 +1,26 @@
+[
+  {
+    "label": "Beranda",
+    "path": "/"
+  },
+  {
+    "label": "Motif Batik",
+    "path": "/motif"
+  },
+  {
+    "label": "Model 3D",
+    "path": "/model-3d"
+  },
+  {
+    "label": "Blogs",
+    "path": "/blogs"
+  },
+  {
+    "label": "Gallery",
+    "path": "/gallery"
+  },
+  {
+    "label": "History",
+    "path": "/history"
+  }
+]

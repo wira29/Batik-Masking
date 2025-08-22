@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
-import './assets/css/app.css';
+// import './assets/css/app.css';
+import './index.css';
 import reportWebVitals from './reportWebVitals';
 import AppRoutes from './router';
 
