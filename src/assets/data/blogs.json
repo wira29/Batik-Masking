@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "title": "Perjalanan Batik Nusantara ke Dunia",
+    "author": "Admin Batik",
+    "date": "2025-08-01",
+    "thumbnail": "/batik/batik-1.jpg",
+    "excerpt": "Batik tidak hanya populer di Indonesia, namun juga telah mendunia. Bagaimana perjalanan panjangnya?",
+    "content": "Batik telah menempuh perjalanan panjang hingga dikenal oleh masyarakat dunia. Dari acara internasional, peragaan busana, hingga dijadikan simbol diplomasi budaya. Kini, batik menjadi kebanggaan bangsa Indonesia dan salah satu warisan dunia yang diakui UNESCO."
+  },
+  {
+    "id": 2,
+    "title": "Filosofi Tersembunyi di Balik Motif Batik",
+    "author": "Tim Redaksi",
+    "date": "2025-08-05",
+    "thumbnail": "/batik/batik-1.jpg",
+    "excerpt": "Setiap motif batik menyimpan makna filosofis mendalam. Mari kita telusuri arti di balik coraknya.",
+    "content": "Motif parang melambangkan kekuatan dan kontinuitas, kawung menyimbolkan keadilan serta kesucian, sedangkan mega mendung memberi pesan ketenangan. Filosofi ini menjadikan batik bukan sekadar kain, tetapi juga medium spiritual dan sosial."
+  },
+  {
+    "id": 3,
+    "title": "Batik dan Generasi Z: Trend atau Tradisi?",
+    "author": "Guest Writer",
+    "date": "2025-08-10",
+    "thumbnail": "/batik/batik-1.jpg",
+    "excerpt": "Apakah Gen Z masih peduli dengan batik, atau hanya sekadar fashion musiman?",
+    "content": "Generasi Z dikenal dengan kreativitas dan kebebasan berekspresi. Batik kini tidak hanya hadir di acara formal, tetapi juga merambah ke streetwear, sneakers, dan aksesoris. Hal ini menunjukkan bahwa batik mampu beradaptasi dengan gaya hidup modern."
+  }
+]

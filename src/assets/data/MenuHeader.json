@@ -18,9 +18,5 @@
   {
     "label": "Gallery",
     "path": "/gallery"
-  },
-  {
-    "label": "History",
-    "path": "/history"
   }
 ]

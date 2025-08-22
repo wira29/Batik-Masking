@@ -1,0 +1,22 @@
+[
+  {
+    "model": "/model/kemeja-pendek.obj",
+    "layout": "/layouts/kemeja-pendek.jpg"
+  },
+  {
+    "model": "/model/uv-kemeja-upgrade.obj",
+    "layout": "/layouts/kemeja-panjang.png"
+  },
+  {
+    "model": "/model/outer.obj",
+    "layout": "/layouts/outer.png"
+  },
+  {
+    "model": "/model/totebag.obj",
+    "layout": "/layouts/totebag.png"
+  },
+  {
+    "model": "/model/tunik.obj",
+    "layout": "/layouts/layout-tunik.jpg"
+  }
+]

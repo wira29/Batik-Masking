@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "title": "Batik Parang",
+    "desc": "Motif klasik melambangkan kesinambungan, keteguhan, dan semangat yang tak terputus.",
+    "img": "/batik/batik-1.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Batik Kawung",
+    "desc": "Terinspirasi dari buah aren (kolang-kaling), melambangkan kesucian, keadilan, dan kebijaksanaan.",
+    "img": "/batik/batik-2.jpg"
+  },
+  {
+    "id": 3,
+    "title": "Mega Mendung",
+    "desc": "Awan berlapis khas Cirebon yang melambangkan kesabaran dan ketenangan batin.",
+    "img": "/batik/batik-3.jpg"
+  },
+  {
+    "id": 4,
+    "title": "Batik Tujuh Rupa",
+    "desc": "Asal Pekalongan dengan ragam flora-fauna pesisiran yang penuh warna.",
+    "img": "/batik/batik-4.jpg"
+  },
+  {
+    "id": 5,
+    "title": "Batik Sidomukti",
+    "desc": "Dipakai dalam upacara pernikahan, bermakna harapan hidup mulia dan bahagia.",
+    "img": "/batik/batik-5.jpg"
+  },
+  {
+    "id": 6,
+    "title": "Batik Lereng",
+    "desc": "Motif diagonal melambangkan kesinambungan hidup dan perjuangan tiada henti.",
+    "img": "/batik/batik-6.jpg"
+  },
+  {
+    "id": 7,
+    "title": "Batik Sekar Jagad",
+    "desc": "Motif indah bagaikan taman bunga, melambangkan keindahan dan keragaman budaya.",
+    "img": "/batik/batik-7.jpg"
+  },
+  {
+    "id": 8,
+    "title": "Batik Lasem",
+    "desc": "Motif pesisiran bercorak merah khas, melambangkan keberanian dan semangat.",
+    "img": "/batik/batik-8.jpg"
+  },
+  {
+    "id": 9,
+    "title": "Batik Priyangan",
+    "desc": "Motif Sunda dengan warna lembut, melambangkan kesederhanaan dan keanggunan.",
+    "img": "/batik/batik-9.jpg"
+  }
+]

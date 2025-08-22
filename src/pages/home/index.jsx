@@ -7,8 +7,9 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import React from "react";
 import { Image as KonvaImage, Layer, Stage, Transformer } from "react-konva";
 import useImage from "use-image";
-import { ArrowLeft, Check, Palette, Shirt, TreePine, X } from "lucide-react";
+import { ArrowLeft, Check, Palette, Shirt, X } from "lucide-react";
 import { Link } from "react-router";
+import dataModel from "../../assets/data/dataModel.json";
 
 const URLImage = ({ image, shapeProps, isSelected, onSelect, onChange }) => {
   const [img] = useImage(image.src);
@@ -18,7 +19,6 @@ const URLImage = ({ image, shapeProps, isSelected, onSelect, onChange }) => {
 
   React.useEffect(() => {
     if (isSelected) {
-      // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current]);
     }
   }, [isSelected]);
@@ -45,10 +45,6 @@ const URLImage = ({ image, shapeProps, isSelected, onSelect, onChange }) => {
           });
         }}
         onTransformEnd={(e) => {
-          // transformer is changing scale of the node
-          // and NOT its width or height
-          // but in the store we have only width and height
-          // to match the data better we will reset scale on transform end
           const node = shapeRef.current;
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
@@ -97,7 +93,6 @@ export default function Home() {
   });
 
   const checkDeselect = (e) => {
-    // deselect when clicked on empty area
     const clickedOnEmpty = e.target === e.target.getStage();
     if (clickedOnEmpty) {
       selectShape(null);
@@ -115,12 +110,12 @@ export default function Home() {
     return <KonvaImage image={image} width={width} height={height} />;
   }
 
-  const selectModel = () => {
+  const selectModel = (model , layout) => {
     setOpenModel(false);
 
     setSelectedModel({
-      model: "/model/kemeja-pendek.obj",
-      layout: "/layouts/kemeja-pendek.jpg",
+      model: model,
+      layout: layout,
     });
   };
 
@@ -131,7 +126,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-row h-full w-max-[100vw] overflow-x-hidden relative">
+    <div className="flex flex-row h-full w-max-[100vw] overflow-x-hidden relative bg-black">
       <div className="flex-4">
         <Canvas camera={{ position: [0, 1, 3] }}>
           <ambientLight intensity={1} />
@@ -145,18 +140,6 @@ export default function Home() {
           </Center>
         </Canvas>
       </div>
-      {/* <div className="w-[300px] bg-[#242526] border-r border-r-slate-200/[0.5] h-screen absolute z-50 left-0">
-        <div className="flex flex-col gap-4 py-10 px-5">
-            <div className="flex items-center gap-3">
-            <TreePine size={25} color="white"/>
-            <h1 className="font-bold text-2xl text-white">List Motif</h1>
-            </div>
-            <hr />
-        </div>
-        <div className="flex flex-col gap-2">
-
-        </div>
-      </div> */}
       <div className="flex-3 h-screen bg-black border-l border-white/[0.5] overflow-hidden">
         <div className="p-5">
           <div className="flex items-center justify-between">
@@ -204,8 +187,8 @@ export default function Home() {
               onDragOver={(e) => e.preventDefault()}
             >
               <Stage
-                width={616} // fixed width
-                height={610} // fixed height
+                width={616}
+                height={610}
                 style={{
                   border: "1px solid grey",
                   borderRadius: "10px",
@@ -217,7 +200,7 @@ export default function Home() {
               >
                 <Layer>
                   <BackgroundImage
-                    src={selectedModel.layout} // path ke gambar
+                    src={selectedModel.layout}
                     width={616}
                     height={610}
                   />
@@ -273,6 +256,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+
       {openModel && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-[#242526] rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -289,41 +273,19 @@ export default function Home() {
               </button>
             </div>
             <div className="grid grid-cols-5 gap-5 p-5 overflow-hidden">
-              <div onClick={() => selectModel()} className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className="h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
+              {dataModel.map((data, index) => (
+                <div
+                  key={index + 1}
+                  onClick={() => selectModel(data.model , data.layout)}
+                  className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden"
+                >
+                  <img
+                    src={data.layout}
+                    alt={`Model | ${data.layout}lkjhgfdsa`}
+                    className="h-full w-full"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -389,18 +351,17 @@ export default function Home() {
 }
 
 function ShirtObj({ textureUrl, pathModel }) {
-  const obj = useLoader(OBJLoader, pathModel);
   const [texture, setTexture] = useState(null);
   const { gl } = useThree();
 
-  // Atur renderer supaya support sRGB (versi baru)
   useEffect(() => {
     gl.outputColorSpace = THREE.SRGBColorSpace;
     gl.toneMapping = THREE.ACESFilmicToneMapping;
     gl.toneMappingExposure = 1.0;
   }, [gl]);
 
-  // Convert base64 / URL jadi THREE.Texture
+  const obj = useLoader(OBJLoader, pathModel);
+
   useEffect(() => {
     if (!textureUrl) return;
 
@@ -409,13 +370,12 @@ function ShirtObj({ textureUrl, pathModel }) {
     img.src = textureUrl;
     img.onload = () => {
       const tex = new THREE.Texture(img);
-      tex.colorSpace = THREE.SRGBColorSpace; // versi baru
+      tex.colorSpace = THREE.SRGBColorSpace;
       tex.needsUpdate = true;
       setTexture(tex);
     };
   }, [textureUrl]);
 
-  // Apply texture ke semua mesh
   useEffect(() => {
     if (!obj || !texture) return;
 
@@ -432,5 +392,5 @@ function ShirtObj({ textureUrl, pathModel }) {
     });
   }, [obj, texture]);
 
-  return <primitive object={obj} scale={[5, 5, 5]} />;
+  return <primitive key={pathModel} object={obj} scale={[5, 5, 5]} />;
 }
