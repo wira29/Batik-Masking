@@ -10,6 +10,7 @@ import useImage from "use-image";
 import { ArrowLeft, Check, Palette, Shirt, X } from "lucide-react";
 import { Link } from "react-router";
 import dataModel from "../../assets/data/dataModel.json";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const URLImage = ({ image, shapeProps, isSelected, onSelect, onChange }) => {
   const [img] = useImage(image.src);
@@ -127,6 +128,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-row h-full w-max-[100vw] overflow-x-hidden relative bg-black">
+        <LoadingScreen duration={5000}/>
       <div className="flex-4">
         <Canvas camera={{ position: [0, 1, 3] }}>
           <ambientLight intensity={1} />
