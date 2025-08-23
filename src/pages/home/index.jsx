@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 
+import { ArrowLeft, Check, Palette, Shirt, X } from "lucide-react";
 import React from "react";
 import { Image as KonvaImage, Layer, Stage, Transformer } from "react-konva";
-import useImage from "use-image";
-import { ArrowLeft, Check, Palette, Shirt, X } from "lucide-react";
 import { Link } from "react-router";
+import useImage from "use-image";
 import dataModel from "../../assets/data/dataModel.json";
 import LoadingScreen from "../../components/LoadingScreen";
 
@@ -111,7 +111,7 @@ export default function Home() {
     return <KonvaImage image={image} width={width} height={height} />;
   }
 
-  const selectModel = (model , layout) => {
+  const selectModel = (model, layout) => {
     setOpenModel(false);
 
     setSelectedModel({
@@ -120,15 +120,30 @@ export default function Home() {
     });
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.key === "Backspace" || e.key === "Delete") && selectedId) {
+        setImages((prev) => prev.filter((img) => img.id !== selectedId));
+        selectShape(null); // reset pilihan
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedId]);
+
   const imagesUrl = [
     "/batik/batik-1.jpg",
     "/batik/batik-2.jpg",
     "/batik/batik-3.jpg",
+    "/batik/batik-4.jpg",
   ];
 
   return (
     <div className="flex flex-row h-full w-max-[100vw] overflow-x-hidden relative bg-black">
-        <LoadingScreen duration={5000}/>
+      <LoadingScreen duration={5000} />
       <div className="flex-4">
         <Canvas camera={{ position: [0, 1, 3] }}>
           <ambientLight intensity={1} />
@@ -278,13 +293,14 @@ export default function Home() {
               {dataModel.map((data, index) => (
                 <div
                   key={index + 1}
-                  onClick={() => selectModel(data.model , data.layout)}
+                  onClick={() => selectModel(data.model, data.layout)}
                   className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden"
                 >
                   <img
-                    src={data.layout}
+                    src={data.img}
                     alt={`Model | ${data.layout}lkjhgfdsa`}
                     className="h-full w-full"
+
                   />
                 </div>
               ))}
@@ -309,41 +325,37 @@ export default function Home() {
               </button>
             </div>
             <div className="grid grid-cols-5 gap-5 p-5 overflow-hidden">
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className="h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
-              <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
-                <img
-                  src="/sejarah-batik/sejarah-batik-1.jpg"
-                  alt=""
-                  className=" h-full"
-                />
-              </div>
+              {imagesUrl.map((img) => {
+                return (
+                  <div className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden">
+                    <img
+                      src={img}
+                      alt=""
+                      className="h-full w-full"
+                      onClick={() => {
+                        setOpenMotif(false);
+                        // tentukan posisi default (misalnya tengah canvas)
+                        const pos = {
+                          x: 616 / 2 - 50, // geser biar gambar muncul agak ke tengah
+                          y: 610 / 2 - 50,
+                        };
+
+                        // tambahkan ke state images
+                        setImages((prev) => [
+                          ...prev,
+                          {
+                            id: Date.now(), // kasih id unik
+                            ...pos,
+                            src: img,
+                            // width: 200,  // set width default
+                            // height: 200,
+                          },
+                        ]);
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

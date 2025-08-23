@@ -1,22 +1,27 @@
 [
   {
     "model": "/model/kemeja-pendek.obj",
-    "layout": "/layouts/kemeja-pendek.jpg"
+    "layout": "/layouts/kemeja-pendek.jpg",
+    "img": "/layouts/img-kemeja-pendek.png"
   },
   {
     "model": "/model/uv-kemeja-upgrade.obj",
-    "layout": "/layouts/kemeja-panjang.png"
+    "layout": "/layouts/kemeja-panjang.png",
+    "img": "/layouts/img-kemeja-panjang.png"
   },
   {
     "model": "/model/outer.obj",
-    "layout": "/layouts/outer.png"
+    "layout": "/layouts/outer.png",
+    "img": "/layouts/img-outer.png"
   },
   {
     "model": "/model/totebag.obj",
-    "layout": "/layouts/totebag.png"
+    "layout": "/layouts/totebag.png",
+    "img": "/layouts/img-totebag.png"
   },
   {
     "model": "/model/tunik.obj",
-    "layout": "/layouts/layout-tunik.jpg"
+    "layout": "/layouts/layout-tunik.jpg",
+    "img": "/layouts/img-tunik.png"
   }
 ]
