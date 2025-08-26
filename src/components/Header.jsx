@@ -8,14 +8,12 @@ const Header = () => {
   const location = useLocation();
 
   const isActivePath = (currentPath, menuPath) => {
-    // kalau menu path "/" cek eksak, selain itu cek startsWith
     if (menuPath === "/") return currentPath === "/";
     return currentPath.startsWith(menuPath);
   };
 
   return (
     <header className="flex justify-between items-center px-6 py-10 lg:py-20 bg-black">
-      {/* Logo */}
       <div className="flex items-center gap-4 text-white">
         <div className="size-10">
           <svg
@@ -41,7 +39,6 @@ const Header = () => {
         </h2>
       </div>
 
-      {/* Desktop Menu */}
       <nav className="hidden md:flex flex-1 justify-end gap-9">
         {MenuHeader.map((item, index) => {
           const isActive = isActivePath(location.pathname, item.path);
@@ -63,7 +60,6 @@ const Header = () => {
         })}
       </nav>
 
-      {/* Mobile Menu Button */}
       <button
         className="md:hidden text-white text-3xl"
         onClick={() => setIsOpen(!isOpen)}
@@ -71,7 +67,6 @@ const Header = () => {
         <Menu />
       </button>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div className="absolute top-20 right-0 w-2/3 bg-black bg-opacity-95 z-50 p-6 flex flex-col items-start gap-4 md:hidden rounded-l-xl shadow-lg">
           {MenuHeader.map((item, index) => {

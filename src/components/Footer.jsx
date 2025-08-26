@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="bg-black text-white py-12 mt-10 border-t border-t-slate-600/[0.5]">
-      <div className="mx-auto lg:px-32 md:px-10 sm:px-5 grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
         <div className="space-y-4 text-center md:text-left">
           <h3 className="text-lg font-semibold">Batik Nusantara</h3>
           <p className="text-sm md:text-base leading-relaxed text-gray-300">
@@ -20,7 +20,7 @@ const Footer = () => {
             { label: "Model 3D", path: "/model-3d" },
             { label: "Blogs", path: "/blogs" },
             { label: "Gallery", path: "/gallery" },
-            { label: "History", path: "/history" },
+            { label: "Tutorial", path: "/tutorial" },
           ].map((item, idx) => (
             <a
               key={idx}

@@ -46,7 +46,7 @@ const HeadSection = () => {
                 </div>
                 <div className="p-4 space-y-3">
                   <img
-                    src="/batik/batik-1.jpg"
+                    src="/assets/parang.jpeg"
                     alt="Batik Parang"
                     className="rounded-lg w-full h-40 object-cover shadow-md"
                   />
@@ -66,7 +66,7 @@ const HeadSection = () => {
                 </div>
                 <div className="p-4 space-y-3">
                   <img
-                    src="/batik/batik-2.jpg"
+                    src="/assets/kawung.jpeg"
                     alt="Batik Kawung"
                     className="rounded-lg w-full h-40 object-cover shadow-md"
                   />
@@ -86,7 +86,7 @@ const HeadSection = () => {
                 </div>
                 <div className="p-4 space-y-3">
                   <img
-                    src="/batik/batik-3.jpg"
+                    src="/assets/mega-mendung.jpeg"
                     alt="Batik Mega Mendung"
                     className="rounded-lg w-full h-40 object-cover shadow-md"
                   />

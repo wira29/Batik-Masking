@@ -7,6 +7,7 @@ import BlogPage from "../pages/BlogPage";
 import { GalleryPage } from "../pages/GalleryPage";
 
 import MainLayout from "../layout/MainLayout";
+import { Index } from "../pages/tutorial";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
   {
     path: "/model-3d",
     element: <Home />,
+  },
+  {
+    path: "/tutorial",
+    element: <Index />,
   },
   {
     path: "*",
