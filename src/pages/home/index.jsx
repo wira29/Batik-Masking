@@ -7,10 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { Link } from "react-router-dom";
 import dataModel from "../../assets/data/dataModel.json";
-import LoadingScreen from "../../components/LoadingScreen";
 import { tutorialSteps } from "../../tutorial/tutorialSteps";
 import BackgroundImage from "./components/BackgroundImage";
-import CropModal from "./components/CropModal"; // Import the new CropModal
+import CropModal from "./components/CropModal";
 import ModelModal from "./components/ModelModal";
 import MotifModal from "./components/MotifModal";
 import ShirtObj from "./components/ShirtObj";
@@ -24,8 +23,6 @@ export default function Home() {
   const [stageTexture, setStageTexture] = useState(null);
   const [openModel, setOpenModel] = useState(false);
   const [openMotif, setOpenMotif] = useState(false);
-
-  // New states for crop functionality
   const [openCrop, setOpenCrop] = useState(false);
   const [cropImageData, setCropImageData] = useState(null);
 
@@ -34,9 +31,25 @@ export default function Home() {
     layout: "/layouts/kemeja-panjang.png",
   });
 
+  const createImageObject = (src, position = null) => {
+    const pos = position || { x: 616 / 2 - 100, y: 610 / 2 - 100 };
+    
+    return {
+      id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      x: pos.x,
+      y: pos.y,
+      src: src,
+      width: 200,
+      height: 200,
+      rotation: 0,
+      scaleX: 1,
+      scaleY: 1,
+      draggable: true,
+    };
+  };
+
   const checkDeselect = (e) => {
-    const clickedOnEmpty = e.target === e.target.getStage();
-    if (clickedOnEmpty) {
+    if (e.target === e.target.getStage()) {
       selectShape(null);
     }
   };
@@ -55,6 +68,14 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleWheel = (e) => {
+    };
+    
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, []);
+
   const applyTexture = () => {
     if (!stageRef.current) return;
     const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
@@ -66,18 +87,22 @@ export default function Home() {
     setSelectedModel({ model, layout });
   };
 
-  // Handle double-click on image to open crop modal
   const handleImageDoubleClick = (imageData) => {
     setCropImageData(imageData);
     setOpenCrop(true);
   };
 
-  // Handle crop completion
   const handleCropComplete = (croppedImageData) => {
     setImages((prev) =>
-      prev.map((img) =>
-        img.id === croppedImageData.id ? croppedImageData : img
-      )
+      prev.map((img) => {
+        if (img.id === croppedImageData.id) {
+          return {
+            ...img,
+            ...croppedImageData,
+          };
+        }
+        return img;
+      })
     );
     setOpenCrop(false);
     setCropImageData(null);
@@ -89,8 +114,6 @@ export default function Home() {
         setImages((prev) => prev.filter((img) => img.id !== selectedId));
         selectShape(null);
       }
-
-      // Add 'C' key shortcut for cropping selected image
       if (e.key.toLowerCase() === "c" && selectedId) {
         const selectedImage = images.find((img) => img.id === selectedId);
         if (selectedImage) {
@@ -120,8 +143,6 @@ export default function Home() {
       </div>
 
       <div className="flex-row h-full w-max-[100vw] overflow-x-hidden relative bg-black hidden lg:flex">
-        <LoadingScreen duration={5000} />
-
         <div className="flex-4">
           <Canvas camera={{ position: [0, 1, 3] }}>
             <ambientLight intensity={1} />
@@ -167,10 +188,8 @@ export default function Home() {
                   stageRef.current.setPointersPositions(e);
                   const pos = stageRef.current.getPointerPosition();
 
-                  setImages((prev) => [
-                    ...prev,
-                    { ...pos, src: imageSrc, id: Date.now() },
-                  ]);
+                  const newImage = createImageObject(imageSrc, pos);
+                  setImages((prev) => [...prev, newImage]);
                 };
                 reader.readAsDataURL(file);
               }}
@@ -197,8 +216,8 @@ export default function Home() {
                   />
                   {images.map((image, i) => (
                     <URLImage
+                      key={image.id}
                       image={image}
-                      key={i}
                       shapeProps={image}
                       isSelected={image.id === selectedId}
                       onSelect={() => selectShape(image.id)}
@@ -232,7 +251,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Existing Modals */}
         {openModel && (
           <ModelModal
             setOpenModel={setOpenModel}
@@ -246,10 +264,10 @@ export default function Home() {
             setOpenMotif={setOpenMotif}
             imagesUrl={imagesUrl}
             setImages={setImages}
+            createImageObject={createImageObject}
           />
         )}
 
-        {/* New Crop Modal */}
         {openCrop && cropImageData && (
           <CropModal
             isOpen={openCrop}
