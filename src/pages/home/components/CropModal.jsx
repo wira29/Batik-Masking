@@ -5,33 +5,26 @@ import useImage from 'use-image';
 
 const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     const [img] = useImage(imageData.src);
-    const [cropBox, setCropBox] = useState({
-        x: 0,
-        y: 0,
-        width: 200,
-        height: 200
-    });
+    const [cropBox, setCropBox] = useState({ x: 0, y: 0, width: 200, height: 200 });
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
     const [resizeHandle, setResizeHandle] = useState(null); // Track which handle is being used
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-    const [originalCropBox, setOriginalCropBox] = useState(null);
     const stageRef = useRef();
 
-    // Initialize crop box when image loads
     useEffect(() => {
         if (img && isOpen) {
-            const initialSize = Math.min(img.width, img.height) * 0.6;
+            const size = Math.min(img.width, img.height, 300);
             setCropBox({
-                x: (img.width - initialSize) / 2,
-                y: (img.height - initialSize) / 2,
-                width: initialSize,
-                height: initialSize
+                x: (img.width - size) / 2,
+                y: (img.height - size) / 2,
+                width: size,
+                height: size
             });
         }
     }, [img, isOpen]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !img) return null;
 
     const handleMouseDown = (e) => {
         const pos = e.target.getStage().getPointerPosition();
@@ -98,12 +91,9 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
             }
         }
 
-        // Check if clicking inside crop box
         const isInsideCrop =
-            pos.x >= cropBox.x &&
-            pos.x <= cropBox.x + cropBox.width &&
-            pos.y >= cropBox.y &&
-            pos.y <= cropBox.y + cropBox.height;
+            scaledX >= cropBox.x && scaledX <= cropBox.x + cropBox.width &&
+            scaledY >= cropBox.y && scaledY <= cropBox.y + cropBox.height;
 
         if (selectedHandle) {
             setIsResizing(true);
@@ -112,14 +102,17 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
             setOriginalCropBox({ ...cropBox });
         } else if (isInsideCrop) {
             setIsDragging(true);
-            setDragStart({ x: pos.x - cropBox.x, y: pos.y - cropBox.y });
+            setDragStart({ x: scaledX - cropBox.x, y: scaledY - cropBox.y });
         }
     };
 
     const handleMouseMove = (e) => {
         if (!isDragging && !isResizing) return;
 
-        const pos = e.target.getStage().getPointerPosition();
+        const stage = e.target.getStage();
+        const pos = stage.getPointerPosition();
+        const scaledX = pos.x / scale;
+        const scaledY = pos.y / scale;
 
         if (isDragging) {
             setCropBox({
@@ -182,9 +175,6 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     };
 
     const handleCrop = () => {
-        if (!img) return;
-
-        // Create a temporary canvas to crop the image
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -197,29 +187,23 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
             0, 0, cropBox.width, cropBox.height
         );
 
-        const croppedImageSrc = canvas.toDataURL();
-
         onCropComplete({
             ...imageData,
-            src: croppedImageSrc,
+            src: canvas.toDataURL('image/png', 0.95),
             width: cropBox.width,
             height: cropBox.height,
-            crop: null // Reset crop data since we've applied it
+            crop: null
         });
-
-        onClose();
     };
 
     const resetCrop = () => {
-        if (img) {
-            const initialSize = Math.min(img.width, img.height) * 0.6;
-            setCropBox({
-                x: (img.width - initialSize) / 2,
-                y: (img.height - initialSize) / 2,
-                width: initialSize,
-                height: initialSize
-            });
-        }
+        const size = Math.min(img.width, img.height, 300);
+        setCropBox({
+            x: (img.width - size) / 2,
+            y: (img.height - size) / 2,
+            width: size,
+            height: size
+        });
     };
 
     const getCursor = () => {
@@ -262,19 +246,24 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     const handleSize = 6;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-gray-900 p-6 rounded-lg max-w-4xl max-h-screen overflow-hidden">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-2">
-                        <Crop className="text-white" size={20} />
-                        <h2 className="text-xl font-semibold text-white">Crop Image</h2>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden border border-gray-800">
+
+                <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                            <Crop className="text-white" size={20} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white">Crop Image</h2>
+                            <p className="text-gray-400 text-sm">Adjust the crop area by dragging</p>
+                        </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all duration-200"
                     >
-                        <X size={20} />
+                        <X size={24} />
                     </button>
                 </div>
 
@@ -353,31 +342,29 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                             Drag to move • Drag handles to resize
                         </div>
                     </div>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex justify-between items-center">
-                    <button
-                        onClick={resetCrop}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors"
-                    >
-                        <RotateCcw size={16} />
-                        Reset
-                    </button>
+                    <div className="grid grid-cols-3 gap-4">
+                        <button
+                            onClick={resetCrop}
+                            className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-lg transition-all duration-200 font-medium"
+                        >
+                            <RotateCcw size={16} />
+                            Reset
+                        </button>
 
-                    <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors"
+                            className="px-4 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-lg transition-all duration-200 font-medium"
                         >
                             Cancel
                         </button>
+
                         <button
                             onClick={handleCrop}
-                            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                            className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 font-medium shadow-lg border border-blue-500/30"
                         >
                             <Check size={16} />
-                            Apply Crop
+                            Apply
                         </button>
                     </div>
                 </div>
