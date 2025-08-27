@@ -10,7 +10,7 @@ export default function URLImage({
   onChange,
   onDoubleClick,
 }) {
-  const [img] = useImage(image.src);
+  const [img] = useImage(image.src, "Anonymous");
   const shapeRef = useRef();
   const trRef = useRef();
 
@@ -21,25 +21,24 @@ export default function URLImage({
     }
   }, [isSelected]);
 
-const getDefaultSize = () => {
-  if (image.width && image.height) {
-    return { width: image.width, height: image.height };
-  }
-
-  if (img) {
-    const maxSize = 200;
-    const aspectRatio = img.width / img.height;
-
-    if (img.width > img.height) {
-      return { width: maxSize, height: maxSize / aspectRatio };
-    } else {
-      return { width: maxSize * aspectRatio, height: maxSize };
+  const getDefaultSize = () => {
+    if (image.width && image.height) {
+      return { width: image.width, height: image.height };
     }
-  }
 
-  return { width: 100, height: 100 };
-};
+    if (img) {
+      const maxSize = 200;
+      const aspectRatio = img.width / img.height;
 
+      if (img.width > img.height) {
+        return { width: maxSize, height: maxSize / aspectRatio };
+      } else {
+        return { width: maxSize * aspectRatio, height: maxSize };
+      }
+    }
+
+    return { width: 100, height: 100 };
+  };
 
   const defaultSize = getDefaultSize();
 
@@ -67,16 +66,15 @@ const getDefaultSize = () => {
             : undefined
         }
         offsetX={
-          image.crop 
-            ? image.crop.width / 2 
+          image.crop
+            ? image.crop.width / 2
             : (image.width || defaultSize.width) / 2
         }
         offsetY={
-          image.crop 
-            ? image.crop.height / 2 
+          image.crop
+            ? image.crop.height / 2
             : (image.height || defaultSize.height) / 2
         }
-        
         draggable
         onClick={(e) => {
           e.cancelBubble = true;
@@ -86,7 +84,6 @@ const getDefaultSize = () => {
           e.cancelBubble = true;
           onSelect();
         }}
-        
         onDblClick={(e) => {
           e.cancelBubble = true;
           onDoubleClick?.(image);
@@ -95,7 +92,6 @@ const getDefaultSize = () => {
           e.cancelBubble = true;
           onDoubleClick?.(image);
         }}
-        
         onDragEnd={(e) => {
           const node = e.target;
           onChange({
@@ -110,7 +106,6 @@ const getDefaultSize = () => {
             }
           }, 0);
         }}
-        
         onTransformEnd={(e) => {
           const node = shapeRef.current;
           if (!node) return;
@@ -140,7 +135,7 @@ const getDefaultSize = () => {
           }, 0);
         }}
       />
-      
+
       {isSelected && (
         <Transformer
           ref={trRef}
@@ -148,20 +143,23 @@ const getDefaultSize = () => {
           flipEnabled={false}
           keepRatio={false}
           enabledAnchors={[
-            'top-left',
-            'top-center', 
-            'top-right',
-            'middle-right',
-            'middle-left', 
-            'bottom-left',
-            'bottom-center',
-            'bottom-right'
+            "top-left",
+            "top-center",
+            "top-right",
+            "middle-right",
+            "middle-left",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
           ]}
           boundBoxFunc={(oldBox, newBox) => {
             const minWidth = 50;
             const minHeight = 50;
-            
-            if (Math.abs(newBox.width) < minWidth || Math.abs(newBox.height) < minHeight) {
+
+            if (
+              Math.abs(newBox.width) < minWidth ||
+              Math.abs(newBox.height) < minHeight
+            ) {
               return oldBox;
             }
             return newBox;
