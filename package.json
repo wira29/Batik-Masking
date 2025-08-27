@@ -5,6 +5,7 @@
   "dependencies": {
     "@react-three/drei": "^10.0.8",
     "@react-three/fiber": "^9.1.2",
+    "@supabase/supabase-js": "^2.56.0",
     "@tailwindcss/cli": "^4.1.7",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
