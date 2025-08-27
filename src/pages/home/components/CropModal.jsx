@@ -13,6 +13,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     });
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
+    const [resizeHandle, setResizeHandle] = useState(null); // Track which handle is being used
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [originalCropBox, setOriginalCropBox] = useState(null);
     const stageRef = useRef();
@@ -34,15 +35,68 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
 
     const handleMouseDown = (e) => {
         const pos = e.target.getStage().getPointerPosition();
-        const rect = e.target.getClientRect();
+        const handleSize = 8;
 
-        // Check if clicking on resize handle (bottom-right corner)
-        const handleSize = 10;
-        const isOnHandle =
-            pos.x >= cropBox.x + cropBox.width - handleSize &&
-            pos.x <= cropBox.x + cropBox.width + handleSize &&
-            pos.y >= cropBox.y + cropBox.height - handleSize &&
-            pos.y <= cropBox.y + cropBox.height + handleSize;
+        // Check for different resize handles
+        const handles = {
+            'se': { // bottom-right
+                x: cropBox.x + cropBox.width - handleSize,
+                y: cropBox.y + cropBox.height - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            },
+            'sw': { // bottom-left
+                x: cropBox.x - handleSize,
+                y: cropBox.y + cropBox.height - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            },
+            'ne': { // top-right
+                x: cropBox.x + cropBox.width - handleSize,
+                y: cropBox.y - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            },
+            'nw': { // top-left
+                x: cropBox.x - handleSize,
+                y: cropBox.y - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            },
+            'n': { // top
+                x: cropBox.x + cropBox.width / 2 - handleSize,
+                y: cropBox.y - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            },
+            's': { // bottom
+                x: cropBox.x + cropBox.width / 2 - handleSize,
+                y: cropBox.y + cropBox.height - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            },
+            'e': { // right
+                x: cropBox.x + cropBox.width - handleSize,
+                y: cropBox.y + cropBox.height / 2 - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            },
+            'w': { // left
+                x: cropBox.x - handleSize,
+                y: cropBox.y + cropBox.height / 2 - handleSize,
+                width: handleSize * 2,
+                height: handleSize * 2
+            }
+        };
+
+        let selectedHandle = null;
+        for (const [handle, bounds] of Object.entries(handles)) {
+            if (pos.x >= bounds.x && pos.x <= bounds.x + bounds.width &&
+                pos.y >= bounds.y && pos.y <= bounds.y + bounds.height) {
+                selectedHandle = handle;
+                break;
+            }
+        }
 
         // Check if clicking inside crop box
         const isInsideCrop =
@@ -51,8 +105,9 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
             pos.y >= cropBox.y &&
             pos.y <= cropBox.y + cropBox.height;
 
-        if (isOnHandle) {
+        if (selectedHandle) {
             setIsResizing(true);
+            setResizeHandle(selectedHandle);
             setDragStart(pos);
             setOriginalCropBox({ ...cropBox });
         } else if (isInsideCrop) {
@@ -72,22 +127,57 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                 x: Math.max(0, Math.min(img.width - cropBox.width, pos.x - dragStart.x)),
                 y: Math.max(0, Math.min(img.height - cropBox.height, pos.y - dragStart.y))
             });
-        } else if (isResizing && originalCropBox) {
+        } else if (isResizing && originalCropBox && resizeHandle) {
             const deltaX = pos.x - dragStart.x;
             const deltaY = pos.y - dragStart.y;
-            const delta = Math.max(deltaX, deltaY); // Keep square aspect ratio
 
-            setCropBox({
-                ...originalCropBox,
-                width: Math.max(50, Math.min(img.width - originalCropBox.x, originalCropBox.width + delta)),
-                height: Math.max(50, Math.min(img.height - originalCropBox.y, originalCropBox.height + delta))
-            });
+            let newCropBox = { ...originalCropBox };
+
+            switch (resizeHandle) {
+                case 'se': // bottom-right
+                    newCropBox.width = Math.max(50, Math.min(img.width - originalCropBox.x, originalCropBox.width + deltaX));
+                    newCropBox.height = Math.max(50, Math.min(img.height - originalCropBox.y, originalCropBox.height + deltaY));
+                    break;
+                case 'sw': // bottom-left
+                    newCropBox.x = Math.max(0, Math.min(originalCropBox.x + originalCropBox.width - 50, originalCropBox.x + deltaX));
+                    newCropBox.width = originalCropBox.width - (newCropBox.x - originalCropBox.x);
+                    newCropBox.height = Math.max(50, Math.min(img.height - originalCropBox.y, originalCropBox.height + deltaY));
+                    break;
+                case 'ne': // top-right
+                    newCropBox.y = Math.max(0, Math.min(originalCropBox.y + originalCropBox.height - 50, originalCropBox.y + deltaY));
+                    newCropBox.height = originalCropBox.height - (newCropBox.y - originalCropBox.y);
+                    newCropBox.width = Math.max(50, Math.min(img.width - originalCropBox.x, originalCropBox.width + deltaX));
+                    break;
+                case 'nw': // top-left
+                    newCropBox.x = Math.max(0, Math.min(originalCropBox.x + originalCropBox.width - 50, originalCropBox.x + deltaX));
+                    newCropBox.y = Math.max(0, Math.min(originalCropBox.y + originalCropBox.height - 50, originalCropBox.y + deltaY));
+                    newCropBox.width = originalCropBox.width - (newCropBox.x - originalCropBox.x);
+                    newCropBox.height = originalCropBox.height - (newCropBox.y - originalCropBox.y);
+                    break;
+                case 'n': // top
+                    newCropBox.y = Math.max(0, Math.min(originalCropBox.y + originalCropBox.height - 50, originalCropBox.y + deltaY));
+                    newCropBox.height = originalCropBox.height - (newCropBox.y - originalCropBox.y);
+                    break;
+                case 's': // bottom
+                    newCropBox.height = Math.max(50, Math.min(img.height - originalCropBox.y, originalCropBox.height + deltaY));
+                    break;
+                case 'e': // right
+                    newCropBox.width = Math.max(50, Math.min(img.width - originalCropBox.x, originalCropBox.width + deltaX));
+                    break;
+                case 'w': // left
+                    newCropBox.x = Math.max(0, Math.min(originalCropBox.x + originalCropBox.width - 50, originalCropBox.x + deltaX));
+                    newCropBox.width = originalCropBox.width - (newCropBox.x - originalCropBox.x);
+                    break;
+            }
+
+            setCropBox(newCropBox);
         }
     };
 
     const handleMouseUp = () => {
         setIsDragging(false);
         setIsResizing(false);
+        setResizeHandle(null);
         setOriginalCropBox(null);
     };
 
@@ -132,6 +222,29 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
         }
     };
 
+    const getCursor = () => {
+        if (isDragging) return 'grabbing';
+        if (isResizing) {
+            switch (resizeHandle) {
+                case 'nw':
+                case 'se':
+                    return 'nw-resize';
+                case 'ne':
+                case 'sw':
+                    return 'ne-resize';
+                case 'n':
+                case 's':
+                    return 'ns-resize';
+                case 'e':
+                case 'w':
+                    return 'ew-resize';
+                default:
+                    return 'default';
+            }
+        }
+        return 'default';
+    };
+
     if (!img) {
         return (
             <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -145,6 +258,8 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     const scale = Math.min(600 / img.width, 500 / img.height, 1);
     const displayWidth = img.width * scale;
     const displayHeight = img.height * scale;
+
+    const handleSize = 6;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -178,7 +293,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                             onMouseDown={handleMouseDown}
                             onMousemove={handleMouseMove}
                             onMouseup={handleMouseUp}
-                            style={{ cursor: isDragging ? 'grabbing' : isResizing ? 'se-resize' : 'default' }}
+                            style={{ cursor: getCursor() }}
                         >
                             <Layer>
                                 {/* Original Image */}
@@ -218,22 +333,24 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     fill="transparent"
                                 />
 
-                                {/* Resize Handle */}
-                                <Rect
-                                    x={cropBox.x + cropBox.width - 5}
-                                    y={cropBox.y + cropBox.height - 5}
-                                    width={10}
-                                    height={10}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
+                                {/* Resize Handles */}
+                                {/* Corner handles */}
+                                <Rect x={cropBox.x - handleSize / 2} y={cropBox.y - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
+                                <Rect x={cropBox.x + cropBox.width - handleSize / 2} y={cropBox.y - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
+                                <Rect x={cropBox.x - handleSize / 2} y={cropBox.y + cropBox.height - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
+                                <Rect x={cropBox.x + cropBox.width - handleSize / 2} y={cropBox.y + cropBox.height - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
+
+                                {/* Side handles */}
+                                <Rect x={cropBox.x + cropBox.width / 2 - handleSize / 2} y={cropBox.y - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
+                                <Rect x={cropBox.x + cropBox.width / 2 - handleSize / 2} y={cropBox.y + cropBox.height - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
+                                <Rect x={cropBox.x - handleSize / 2} y={cropBox.y + cropBox.height / 2 - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
+                                <Rect x={cropBox.x + cropBox.width - handleSize / 2} y={cropBox.y + cropBox.height / 2 - handleSize / 2} width={handleSize} height={handleSize} fill="white" stroke="black" strokeWidth={1} />
                             </Layer>
                         </Stage>
 
                         {/* Instructions */}
                         <div className="absolute top-2 left-2 bg-black bg-opacity-75 text-white text-sm p-2 rounded">
-                            Drag to move • Drag corner to resize
+                            Drag to move • Drag handles to resize
                         </div>
                     </div>
                 </div>

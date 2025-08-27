@@ -1,7 +1,7 @@
 [
   {
     "model": "/model/kemeja-pendek.obj",
-    "layout": "/layouts/kemeja-pendek.jpg",
+    "layout": "/layouts/kemeja-pendek.png",
     "img": "/layouts/img-kemeja-pendek.png"
   },
   {
@@ -21,7 +21,7 @@
   },
   {
     "model": "/model/tunik.obj",
-    "layout": "/layouts/layout-tunik.jpg",
+    "layout": "/layouts/tunik.png",
     "img": "/layouts/img-tunik.png"
   }
 ]
