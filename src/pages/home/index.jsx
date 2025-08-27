@@ -1,21 +1,21 @@
-import { Canvas } from "@react-three/fiber";
 import { Center, OrbitControls } from "@react-three/drei";
-import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { Info } from "lucide-react";
-import { Layer, Stage } from "react-konva";
-import LoadingScreen from "../../components/LoadingScreen";
-import ShirtObj from "./components/ShirtObj";
-import BackgroundImage from "./components/BackgroundImage";
-import URLImage from "./components/URLImage";
-import dataModel from "../../assets/data/dataModel.json"
-import ModelModal from "./components/ModelModal";
-import MotifModal from "./components/MotifModal";
-import SideToolbar from "./components/SideToolbar";
+import { Canvas } from "@react-three/fiber";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import { Info } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Layer, Stage } from "react-konva";
+import { Link } from "react-router-dom";
+import dataModel from "../../assets/data/dataModel.json";
+import LoadingScreen from "../../components/LoadingScreen";
 import { tutorialSteps } from "../../tutorial/tutorialSteps";
-
+import BackgroundImage from "./components/BackgroundImage";
+import CropModal from "./components/CropModal"; // Import the new CropModal
+import ModelModal from "./components/ModelModal";
+import MotifModal from "./components/MotifModal";
+import ShirtObj from "./components/ShirtObj";
+import SideToolbar from "./components/SideToolbar";
+import URLImage from "./components/URLImage";
 
 export default function Home() {
   const stageRef = useRef();
@@ -24,6 +24,11 @@ export default function Home() {
   const [stageTexture, setStageTexture] = useState(null);
   const [openModel, setOpenModel] = useState(false);
   const [openMotif, setOpenMotif] = useState(false);
+
+  // New states for crop functionality
+  const [openCrop, setOpenCrop] = useState(false);
+  const [cropImageData, setCropImageData] = useState(null);
+
   const [selectedModel, setSelectedModel] = useState({
     model: "/model/uv-kemeja-upgrade.obj",
     layout: "/layouts/kemeja-panjang.png",
@@ -36,7 +41,7 @@ export default function Home() {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const tutorialDone = localStorage.getItem("tutorialDone");
     if (!tutorialDone) {
       const driverObj = driver({
@@ -61,16 +66,41 @@ export default function Home() {
     setSelectedModel({ model, layout });
   };
 
+  // Handle double-click on image to open crop modal
+  const handleImageDoubleClick = (imageData) => {
+    setCropImageData(imageData);
+    setOpenCrop(true);
+  };
+
+  // Handle crop completion
+  const handleCropComplete = (croppedImageData) => {
+    setImages((prev) =>
+      prev.map((img) =>
+        img.id === croppedImageData.id ? croppedImageData : img
+      )
+    );
+    setOpenCrop(false);
+    setCropImageData(null);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.key === "Backspace" || e.key === "Delete") && selectedId) {
         setImages((prev) => prev.filter((img) => img.id !== selectedId));
         selectShape(null);
       }
+
+      // Add 'C' key shortcut for cropping selected image
+      if (e.key.toLowerCase() === "c" && selectedId) {
+        const selectedImage = images.find((img) => img.id === selectedId);
+        if (selectedImage) {
+          handleImageDoubleClick(selectedImage);
+        }
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedId]);
+  }, [selectedId, images]);
 
   const imagesUrl = [
     "/batik/batik-1.jpg",
@@ -113,7 +143,14 @@ export default function Home() {
                 <h1 className="text-3xl text-white font-semibold">
                   Terapkan motif Batik
                 </h1>
-                <p className="text-white">Pilih Design batik yang anda suka</p>
+                <p className="text-white">
+                  Pilih Design batik yang anda suka
+                  {selectedId && (
+                    <span className="block text-sm text-gray-400 mt-1">
+                      Double-click gambar atau tekan 'C' untuk crop
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
 
@@ -150,7 +187,7 @@ export default function Home() {
                 ref={stageRef}
                 onMouseDown={checkDeselect}
                 onTouchStart={checkDeselect}
-                 className="stage-editor"
+                className="stage-editor"
               >
                 <Layer>
                   <BackgroundImage
@@ -165,6 +202,7 @@ export default function Home() {
                       shapeProps={image}
                       isSelected={image.id === selectedId}
                       onSelect={() => selectShape(image.id)}
+                      onDoubleClick={handleImageDoubleClick}
                       onChange={(newAttrs) => {
                         const imgs = images.slice();
                         imgs[i] = newAttrs;
@@ -194,6 +232,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Existing Modals */}
         {openModel && (
           <ModelModal
             setOpenModel={setOpenModel}
@@ -207,6 +246,19 @@ export default function Home() {
             setOpenMotif={setOpenMotif}
             imagesUrl={imagesUrl}
             setImages={setImages}
+          />
+        )}
+
+        {/* New Crop Modal */}
+        {openCrop && cropImageData && (
+          <CropModal
+            isOpen={openCrop}
+            onClose={() => {
+              setOpenCrop(false);
+              setCropImageData(null);
+            }}
+            imageData={cropImageData}
+            onCropComplete={handleCropComplete}
           />
         )}
       </div>
