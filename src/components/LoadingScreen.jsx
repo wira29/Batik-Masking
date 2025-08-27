@@ -12,7 +12,7 @@ const LoadingScreen = ({duration = 3000}) => {
   if (!loading) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black text-white">
+    <div className="fixed inset-0 z-[99999999999] flex flex-col items-center justify-center bg-black text-white">
       <div className="flex items-center gap-3">
         <Sparkles size={40} className="text-amber-500" />
         <h1 className="text-3xl md:text-5xl font-bold tracking-widest text-amber-500">
