@@ -1,13 +1,12 @@
-import Home from "../pages/home";
-import LandingPage from "../pages/LandingPage/LandingPage";
-import LandingPageV2 from "../pages/LandingPage/LandingPageV2";
 import { createBrowserRouter } from "react-router-dom";
-import MotifPage from "../pages/MotifPage";
-import BlogPage from "../pages/BlogPage";
-import { GalleryPage } from "../pages/GalleryPage";
-
 import MainLayout from "../layout/MainLayout";
-import { Index } from "../pages/tutorial";
+import Index from "../pages/LandingPage/Index";
+import MotifPage from "../pages/LandingPage/Motif/MotifPage";
+import { GalleryPage } from "../pages/LandingPage/Gallery/GalleryPage";
+import BlogPage from "../pages/LandingPage/Blogs/BlogPage";
+import MotifBatik from "../pages/admin/motif/Index";
+import Home from "../pages/LandingPage/Model_3D";
+import AdminLayout from "../layout/AdminLayout";
 
 export const router = createBrowserRouter([
   {
@@ -16,11 +15,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <LandingPageV2 />,
-      },
-      {
-        path: "/landing-page-v1",
-        element: <LandingPage />,
+        element: <Index />,
       },
       {
         path: "/motif",
@@ -33,6 +28,16 @@ export const router = createBrowserRouter([
       {
         path: "/blogs",
         element: <BlogPage />,
+      },
+    ],
+  },
+  {
+    path: "admin",
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "motif-batik",
+        element: <MotifBatik />,
       },
     ],
   },

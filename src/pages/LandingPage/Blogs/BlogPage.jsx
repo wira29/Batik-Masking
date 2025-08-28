@@ -1,4 +1,4 @@
-import Blogs from "../../src/assets/data/blogs.json";
+import Blogs from "../../../assets/data/blogs.json";
 import { Calendar, User } from "lucide-react";
 
 const BlogPage = () => {

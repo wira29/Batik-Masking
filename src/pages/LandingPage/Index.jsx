@@ -5,7 +5,7 @@ import History from "../../components/History";
 import MotifSection from "../../components/MotifSection";
 import Contact from "../../components/Contact";
 
-const LandingPageV2 = () => {
+const Index = () => {
   const Blogs = [
     {
       id: 1,
@@ -81,4 +81,4 @@ const LandingPageV2 = () => {
   );
 };
 
-export default LandingPageV2;
+export default Index;
