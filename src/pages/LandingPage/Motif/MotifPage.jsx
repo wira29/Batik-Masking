@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import LoadingGrid from "../../../components/LoadingGrid";
 import MotifService from "../../../services/MotifService";
+import { getImage } from "../../../utils/imageHelper";
 
 const MotifPage = () => {
   const [motifs, setMotifs] = useState([]);
@@ -13,7 +14,6 @@ const MotifPage = () => {
         setLoading(true);
         const dataFromDB = await MotifService.getMotifs();
 
-        // gabungkan DB + JSON
         const combinedData = [
           ...dataFromDB,
           // ...Motifs.map((item, index) => ({
@@ -51,7 +51,7 @@ const MotifPage = () => {
               className="bg-zinc-900 rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform duration-300"
             >
               <img
-                src={motif.image_url}
+                src={getImage(motif.image_url)}
                 alt={motif.title}
                 className="w-full h-56 object-cover"
               />

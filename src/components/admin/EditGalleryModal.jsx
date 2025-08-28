@@ -4,6 +4,8 @@ import DragDropUpload from './DragDropUpload';
 
 const EditGalleryModal = ({ isOpen, onClose, motif, onSave, loading }) => {
     const [form, setForm] = useState({
+        title: '',
+        description: '',
         image: null,
         currentImageUrl: ''
     });
@@ -11,6 +13,8 @@ const EditGalleryModal = ({ isOpen, onClose, motif, onSave, loading }) => {
     useEffect(() => {
         if (motif) {
             setForm({
+                title: motif.title || '',
+                description: motif.description || '',
                 image: null,
                 currentImageUrl: motif.image_url || ''
             });
@@ -25,18 +29,20 @@ const EditGalleryModal = ({ isOpen, onClose, motif, onSave, loading }) => {
         setForm(prev => ({ ...prev, image: null }));
     };
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm(prev => ({ ...prev, [name]: value }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const updateData = {
             title: form.title,
             description: form.description,
-            newImage: form.image
+            image_url: form.image
         };
-
         await onSave(motif.id, updateData);
     };
-
-    // const isFormValid = form.title.trim() && form.description.trim();
 
     if (!isOpen || !motif) return null;
 
@@ -46,7 +52,7 @@ const EditGalleryModal = ({ isOpen, onClose, motif, onSave, loading }) => {
             <div className="flex min-h-full items-center justify-center p-4">
                 <div className="relative bg-black rounded-xl border border-gray-500/[0.5] shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                     <div className="sticky top-0 bg-black border-b border-gray-500/[0.5] px-6 py-4 flex items-center justify-between z-50">
-                        <h2 className="text-xl font-bold text-white">Edit Motif</h2>
+                        <h2 className="text-xl font-bold text-white">Edit Galery | {form.title}</h2>
                         <button
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-300 transition-colors"
@@ -56,7 +62,33 @@ const EditGalleryModal = ({ isOpen, onClose, motif, onSave, loading }) => {
                     </div>
 
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                        {/* Title */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Judul</label>
+                            <input
+                                type="text"
+                                name="title"
+                                value={form.title}
+                                onChange={handleChange}
+                               className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                required
+                            />
+                        </div>
 
+                        {/* Description */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Deskripsi</label>
+                            <textarea
+                                name="description"
+                                value={form.description}
+                                onChange={handleChange}
+                                rows={4}
+                               className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                required
+                            />
+                        </div>
+
+                        {/* Image */}
                         {form.currentImageUrl && !form.image && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">

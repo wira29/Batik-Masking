@@ -1,21 +1,20 @@
-// pages/MotifDashboard.jsx
 import React from "react";
 import z from "zod";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
 import EditGalleryModal from "../../../components/admin/EditGalleryModal";
 import GalleryForm from "../../../components/admin/GalleryForm";
-import MotifGrid from "../../../components/admin/MotifGrid";
 import Notification from "../../../components/Notification";
 import BlurText from "../../../components/react-bits/BlurText/BlurText";
-import MotifService from "../../../services/MotifService";
+import GalleryService from "../../../services/GalleryService";
+import DataGrid from "../../../components/admin/DataGrid";
 
-const motifSchema = z.object({
+const gellerySchema = z.object({
     title: z.string().min(1, { message: "Nama wajib diisi" }),
     description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
     image_url: z.string().min(1, { message: "Gambar wajib diisi" }),
 });
 
-const editMotifSchema = z.object({
+const editGellerySchema = z.object({
     title: z.string().min(1, { message: "Nama wajib diisi" }),
     description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
     image_url: z.string().min(1, { message: "Image is required" }).optional(),
@@ -25,7 +24,7 @@ class GalleryDashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            motifs: [],
+            gallery: [],
             loading: false,
             submitting: false,
             editing: false,
@@ -42,7 +41,7 @@ class GalleryDashboard extends React.Component {
     }
 
     componentDidMount() {
-        this.loadMotifs();
+        this.loadGallery();
     }
 
     showNotification = (message, type = "success") => {
@@ -52,11 +51,11 @@ class GalleryDashboard extends React.Component {
         }, 5000);
     };
 
-    loadMotifs = async () => {
+    loadGallery = async () => {
         this.setState({ loading: true });
         try {
-            const motifs = await MotifService.getMotifs();
-            this.setState({ motifs });
+            const gallery = await GalleryService.getGallery();
+            this.setState({ gallery });
         } catch (error) {
             console.error("Error loading motifs:", error);
             this.showNotification("Gagal memuat data motif", "error");
@@ -65,14 +64,12 @@ class GalleryDashboard extends React.Component {
         }
     };
 
-
-
     handleSubmit = async (formData) => {
         this.setState({ submitting: true });
         try {
             let imageUrl = null;
             if (formData.image) {
-                imageUrl = await MotifService.uploadImage(formData.image);
+                imageUrl = await GalleryService.uploadImage(formData.image);
             }
             const motifData = {
                 title: formData.title,
@@ -80,9 +77,9 @@ class GalleryDashboard extends React.Component {
                 image_url: imageUrl ?? "",
             };
 
-            motifSchema.parse(motifData);
+            gellerySchema.parse(motifData);
 
-            await MotifService.createMotif(motifData);
+            await GalleryService.createGalleryItem(motifData);
             this.showNotification("Motif berhasil ditambahkan!");
             this.loadMotifs();
         } catch (error) {
@@ -107,9 +104,9 @@ class GalleryDashboard extends React.Component {
 
     handleDelete = async (id) => {
         try {
-            await MotifService.deleteMotif(id);
+            await GalleryService.deleteGalleryItem(id);
             this.showNotification("Motif berhasil dihapus");
-            this.loadMotifs();
+            this.loadGallery();
         } catch (error) {
             console.error("Error deleting motif:", error);
             this.showNotification("Gagal menghapus motif", "error");
@@ -152,7 +149,7 @@ class GalleryDashboard extends React.Component {
         try {
             let imageUrl = null;
             if (updateData.newImage) {
-                imageUrl = await MotifService.uploadImage(updateData.newImage);
+                imageUrl = await GalleryService.uploadImage(updateData.newImage);
             }
 
             const payload = {
@@ -161,12 +158,12 @@ class GalleryDashboard extends React.Component {
                 ...(imageUrl && { image_url: imageUrl }),
             };
 
-            editMotifSchema.parse(payload);
+            editGellerySchema.parse(payload);
 
-            await MotifService.updateMotif(id, payload);
+            await GalleryService.updateGalleryItem(id, payload);
             this.showNotification("Motif berhasil diperbarui!");
             this.closeEditModal();
-            this.loadMotifs();
+            this.loadGallery();
         } catch (error) {
 
             if (error instanceof z.ZodError) {
@@ -178,8 +175,8 @@ class GalleryDashboard extends React.Component {
 
             this.showNotification(
                 error.message.includes("duplicate")
-                    ? "Judul motif sudah ada, gunakan judul yang berbeda"
-                    : "Gagal memperbarui motif. Silakan coba lagi.",
+                    ? "Judul gallery sudah ada, gunakan judul yang berbeda"
+                    : "Gagal memperbarui gallery. Silakan coba lagi.",
                 "error"
             );
         } finally {
@@ -189,7 +186,7 @@ class GalleryDashboard extends React.Component {
 
     render() {
         const {
-            motifs,
+            gallery,
             loading,
             submitting,
             editing,
@@ -231,9 +228,9 @@ class GalleryDashboard extends React.Component {
                                     Semua motif batik yang telah Anda buat
                                 </p>
                             </div>
-
-                            <MotifGrid
-                                motifs={motifs}
+                            
+                            <DataGrid
+                                items={gallery}
                                 onDelete={this.openConfirmModal}
                                 onEdit={this.openEditModal}
                                 loading={loading}

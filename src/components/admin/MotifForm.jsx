@@ -1,4 +1,3 @@
-// components/MotifForm.jsx
 import { Loader2, Plus } from 'lucide-react';
 import { useState } from 'react';
 import DragDropUpload from './DragDropUpload';

@@ -1,40 +1,99 @@
-import { Grid2X2, Palette, TreePalm } from 'lucide-react';
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { Grid2X2, Palette, TreePalm, Menu, X, PencilRuler } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import menuData from "../../assets/data/adminMenu.json";
+
+
+const icons = {
+  Palette,
+  Grid2X2,
+  PencilRuler,
+};
 
 const AdminHeader = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
   return (
     <header className="bg-black border-b border-gray-500/[0.5] sticky top-0 z-50">
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
-              <TreePalm className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">Batik Dashboard</h1>
-              <p className="text-sm text-gray-400">Admin Panel</p>
-            </div>
+      <div className="px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
+            <TreePalm className="w-6 h-6 text-white" />
           </div>
-
-          <nav className="hidden md:flex items-center space-x-8">
-            <button className="flex items-center space-x-2 px-4 py-2 text-black bg-white rounded-lg hover:bg-gray-700 transition-colors">
-              <Palette className="w-4 h-4" />
-              <span>Motif Batik</span>
-            </button>
-            <button className="flex items-center space-x-2 px-4 py-2 text-white">
-              <Grid2X2 className="w-4 h-4" />
-              <span>Model</span>
-            </button>
-            <button className="flex items-center space-x-2 px-4 py-2 text-white">
-              <Grid2X2 className="w-4 h-4" />
-              <span>Blog</span>
-            </button>
-            <button className="flex items-center space-x-2 px-4 py-2 text-white">
-              <Grid2X2 className="w-4 h-4" />
-              <span>Galeri</span>
-            </button>
-          </nav>
+          <div>
+            <h1 className="text-xl font-bold text-white">Batik Dashboard</h1>
+            <p className="text-sm text-gray-400">Admin Panel</p>
+          </div>
         </div>
+
+        <nav className="hidden md:flex items-center space-x-4">
+          {menuData.map((item) => {
+            const Icon = icons[item.icon] || Grid2X2;
+            return (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors
+                   ${
+                     isActive
+                       ? "bg-white text-black font-semibold"
+                       : "text-white hover:bg-gray-800"
+                   }`
+                }
+              >
+                <Icon className="w-4 h-4" />
+                <span>{item.label}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden text-white"
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            key="mobileMenu"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="md:hidden bg-black border-t border-gray-700 px-6 py-4 space-y-3"
+          >
+            {menuData.map((item) => {
+              const Icon = icons[item.icon] || Grid2X2;
+              const isActive = location.pathname === item.path
+
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={
+                    `flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors
+                     ${
+                       isActive
+                         ? "bg-white text-black font-semibold"
+                         : "text-white hover:bg-gray-800"
+                     }`
+                  }
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </NavLink>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

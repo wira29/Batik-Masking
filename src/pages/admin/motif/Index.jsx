@@ -1,13 +1,12 @@
-// pages/MotifDashboard.jsx
 import React from "react";
 import z from "zod";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
 import EditMotifModal from "../../../components/admin/EditMotifModal";
 import MotifForm from "../../../components/admin/MotifForm";
-import MotifGrid from "../../../components/admin/MotifGrid";
 import Notification from "../../../components/Notification";
 import BlurText from "../../../components/react-bits/BlurText/BlurText";
 import MotifService from "../../../services/MotifService";
+import DataGrid from "../../../components/admin/DataGrid";
 
 const motifSchema = z.object({
   title: z.string().min(1, { message: "Nama wajib diisi" }),
@@ -232,8 +231,8 @@ class MotifDashboard extends React.Component {
                 </p>
               </div>
 
-              <MotifGrid
-                motifs={motifs}
+              <DataGrid
+                items={motifs}
                 onDelete={this.openConfirmModal}
                 onEdit={this.openEditModal}
                 loading={loading}
