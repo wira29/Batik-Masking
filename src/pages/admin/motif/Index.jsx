@@ -1,13 +1,25 @@
 // pages/MotifDashboard.jsx
 import React from "react";
-import { AlertCircle, CheckCircle } from "lucide-react";
-import MotifService from "../../../services/MotifService";
+import z from "zod";
+import ConfirmModal from "../../../components/admin/ConfirmModal";
+import EditMotifModal from "../../../components/admin/EditMotifModal";
 import MotifForm from "../../../components/admin/MotifForm";
 import MotifGrid from "../../../components/admin/MotifGrid";
-import EditMotifModal from "../../../components/admin/EditMotifModal";
-import ConfirmModal from "../../../components/admin/ConfirmModal";
-import BlurText from "../../../components/react-bits/BlurText/BlurText";
 import Notification from "../../../components/Notification";
+import BlurText from "../../../components/react-bits/BlurText/BlurText";
+import MotifService from "../../../services/MotifService";
+
+const motifSchema = z.object({
+  title: z.string().min(1, { message: "Nama wajib diisi" }),
+  description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
+  image_url: z.string().min(1, { message: "Gambar wajib diisi" }),
+});
+
+const editMotifSchema = z.object({
+  title: z.string().min(1, { message: "Nama wajib diisi" }),
+  description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
+  image_url: z.string().min(1, { message: "Image is required" }).optional(),
+});
 
 class MotifDashboard extends React.Component {
   constructor(props) {
@@ -53,6 +65,8 @@ class MotifDashboard extends React.Component {
     }
   };
 
+
+
   handleSubmit = async (formData) => {
     this.setState({ submitting: true });
     try {
@@ -63,14 +77,23 @@ class MotifDashboard extends React.Component {
       const motifData = {
         title: formData.title,
         description: formData.description,
-        image_url: imageUrl,
+        image_url: imageUrl ?? "",
       };
+
+      motifSchema.parse(motifData);
 
       await MotifService.createMotif(motifData);
       this.showNotification("Motif berhasil ditambahkan!");
       this.loadMotifs();
     } catch (error) {
-      console.error("Error creating motif:", error);
+
+      if (error instanceof z.ZodError) {
+        error.issues.forEach((err) => {
+          this.showNotification(err.message, "error");
+        });
+        return;
+      }
+
       this.showNotification(
         error.message.includes("duplicate")
           ? "Judul motif sudah ada, gunakan judul yang berbeda"
@@ -138,12 +161,21 @@ class MotifDashboard extends React.Component {
         ...(imageUrl && { image_url: imageUrl }),
       };
 
+      editMotifSchema.parse(payload);
+
       await MotifService.updateMotif(id, payload);
       this.showNotification("Motif berhasil diperbarui!");
       this.closeEditModal();
       this.loadMotifs();
     } catch (error) {
-      console.error("Error updating motif:", error);
+
+      if (error instanceof z.ZodError) {
+        error.issues.forEach((err) => {
+          this.showNotification(err.message, "error");
+        });
+        return;
+      }
+
       this.showNotification(
         error.message.includes("duplicate")
           ? "Judul motif sudah ada, gunakan judul yang berbeda"
@@ -168,7 +200,7 @@ class MotifDashboard extends React.Component {
 
     return (
       <div className="min-h-screen bg-black">
-       <Notification notification={notification} />
+        <Notification notification={notification} />
 
         <main className="max-w-7xl mx-auto px-6 py-8">
           <div className="space-y-8">

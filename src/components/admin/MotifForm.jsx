@@ -1,6 +1,6 @@
 // components/MotifForm.jsx
-import React, { useState } from 'react';
-import { Plus, Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
+import { useState } from 'react';
 import DragDropUpload from './DragDropUpload';
 
 const MotifForm = ({ onSubmit, loading }) => {
@@ -28,7 +28,7 @@ const MotifForm = ({ onSubmit, loading }) => {
     setForm({ title: '', description: '', image: null });
   };
 
-  const isFormValid = form.title.trim() && form.description.trim();
+  // const isFormValid = form.title.trim() && form.description.trim();
 
   return (
     <div className="bg-black rounded-xl border border-gray-500/[0.5] overflow-hidden">
@@ -53,7 +53,7 @@ const MotifForm = ({ onSubmit, loading }) => {
             value={form.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
             className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-            required
+
           />
         </div>
 
@@ -67,7 +67,7 @@ const MotifForm = ({ onSubmit, loading }) => {
             onChange={(e) => handleInputChange('description', e.target.value)}
             rows={4}
             className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-            required
+
           />
         </div>
 
@@ -75,12 +75,13 @@ const MotifForm = ({ onSubmit, loading }) => {
           onFileSelect={handleFileSelect}
           selectedFile={form.image}
           onRemove={handleRemoveFile}
+          isRequired={true}
         />
 
         <div className="flex justify-end pt-4 border-t border-gray-800">
           <button
             type="submit"
-            disabled={loading || !isFormValid}
+            disabled={loading}
             className="flex items-center space-x-2 px-6 py-3 bg-purple-500 rounded-xl hover:bg-purple-400 disabled:hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? (

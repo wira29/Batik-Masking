@@ -27,7 +27,8 @@
     "tailwindcss": "^4.1.7",
     "three": "^0.176.0",
     "use-image": "^1.1.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zod": "^4.1.4"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -1,12 +1,12 @@
-import React, { useState, useRef } from 'react';
-import { Upload, X, PictureInPicture } from 'lucide-react';
+import { PictureInPicture, Upload, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 const MAX_FILE_SIZE_MB = 2;
 const MAX_FILE_NAME_LENGTH = 50;
 const MAX_WIDTH = 400;
 const MAX_HEIGHT = 400;
 
-const DragDropUpload = ({ onFileSelect, selectedFile, onRemove }) => {
+const DragDropUpload = ({ onFileSelect, selectedFile, onRemove, isRequired = false }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef();
 
@@ -102,7 +102,7 @@ const DragDropUpload = ({ onFileSelect, selectedFile, onRemove }) => {
   return (
     <div className="w-full">
       <label className="block text-sm font-medium text-gray-300 mb-2">
-        Gambar Motif
+        Gambar Motif {isRequired && <span className="text-red-400">*</span>}
       </label>
 
       {selectedFile ? (
@@ -136,11 +136,10 @@ const DragDropUpload = ({ onFileSelect, selectedFile, onRemove }) => {
         </div>
       ) : (
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
-            isDragOver
-              ? 'border-blue-500 bg-blue-500/10'
-              : 'border-gray-600 hover:border-gray-500 hover:bg-gray-900/50'
-          }`}
+          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${isDragOver
+            ? 'border-blue-500 bg-blue-500/10'
+            : 'border-gray-600 hover:border-gray-500 hover:bg-gray-900/50'
+            }`}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
@@ -149,9 +148,8 @@ const DragDropUpload = ({ onFileSelect, selectedFile, onRemove }) => {
         >
           <div className="flex flex-col items-center space-y-4">
             <div
-              className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
-                isDragOver ? 'bg-blue-500/20' : 'bg-gray-800'
-              }`}
+              className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${isDragOver ? 'bg-blue-500/20' : 'bg-gray-800'
+                }`}
             >
               {isDragOver ? (
                 <Upload className="w-8 h-8 text-blue-400" />

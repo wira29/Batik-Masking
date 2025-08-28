@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Save, Loader2 } from 'lucide-react';
+import { Loader2, Save, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import DragDropUpload from './DragDropUpload';
 
 const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
@@ -40,11 +40,11 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
       description: form.description,
       newImage: form.image
     };
-    
+
     await onSave(motif.id, updateData);
   };
 
-  const isFormValid = form.title.trim() && form.description.trim();
+  // const isFormValid = form.title.trim() && form.description.trim();
 
   if (!isOpen || !motif) return null;
 
@@ -74,7 +74,7 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
                 value={form.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                required
+
               />
             </div>
 
@@ -88,7 +88,7 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 rows={4}
                 className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-                required
+
               />
             </div>
 
@@ -138,7 +138,7 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
               </button>
               <button
                 type="submit"
-                disabled={loading || !isFormValid}
+                disabled={loading}
                 className="flex items-center space-x-2 px-6 py-3 text-white bg-purple-500 rounded-xl hover:bg-purple-400 disabled:hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {loading ? (
