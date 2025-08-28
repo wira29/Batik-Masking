@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import MotifService from "../../../services/MotifService";
 import LoadingGrid from "../../../components/LoadingGrid";
-import Motifs from "../../../assets/data/motifs.json";
+import MotifService from "../../../services/MotifService";
 
 const MotifPage = () => {
   const [motifs, setMotifs] = useState([]);
@@ -17,10 +16,10 @@ const MotifPage = () => {
         // gabungkan DB + JSON
         const combinedData = [
           ...dataFromDB,
-          ...Motifs.map((item, index) => ({
-            ...item,
-            id: `json-${index}`, // key unik untuk JSON
-          })),
+          // ...Motifs.map((item, index) => ({
+          //   ...item,
+          //   id: `json-${index}`, // key unik untuk JSON
+          // })),
         ];
 
         setMotifs(combinedData);

@@ -1,4 +1,4 @@
-import { Grid2X2, Palette, TreePalm } from 'lucide-react';
+import { Palette, TreePalm } from 'lucide-react';
 
 const AdminHeader = () => {
   return (
@@ -18,12 +18,12 @@ const AdminHeader = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <button className="flex items-center space-x-2 px-4 py-2 text-black bg-white rounded-lg hover:bg-gray-700 transition-colors">
               <Palette className="w-4 h-4" />
-              <span>Motifs</span>
+              <span>Motif Batik</span>
             </button>
-            <button className="flex items-center space-x-2 px-4 py-2 text-white">
+            {/* <button className="flex items-center space-x-2 px-4 py-2 text-white">
               <Grid2X2 className="w-4 h-4" />
               <span>Model</span>
-            </button>
+            </button> */}
           </nav>
         </div>
       </div>

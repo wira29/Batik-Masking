@@ -4,7 +4,7 @@ import { Image as KonvaImage, Layer, Rect, Stage } from 'react-konva';
 import useImage from 'use-image';
 
 const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
-    const [img] = useImage(imageData.src);
+    const [img] = useImage(imageData.src, 'anonymous');
     const [cropBox, setCropBox] = useState({
         x: 0,
         y: 0,

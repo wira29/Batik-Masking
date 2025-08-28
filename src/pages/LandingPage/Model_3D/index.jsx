@@ -33,14 +33,14 @@ export default function Home() {
 
   const createImageObject = (src, position = null) => {
     const pos = position || { x: 616 / 2 - 100, y: 610 / 2 - 100 };
-    
+
     return {
       id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       x: pos.x,
       y: pos.y,
       src: src,
-      width: 200,
-      height: 200,
+      // width: 200,
+      // height: 200,
       rotation: 0,
       scaleX: 1,
       scaleY: 1,
@@ -71,7 +71,7 @@ export default function Home() {
   useEffect(() => {
     const handleWheel = (e) => {
     };
-    
+
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => window.removeEventListener('wheel', handleWheel);
   }, []);

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import MotifService from "../../../../services/MotifService";
+import { useEffect, useState } from "react";
 import LoadingGrid from "../../../../components/LoadingGrid";
+import MotifService from "../../../../services/MotifService";
 
 export default function MotifModal({
   setOpenMotif,
@@ -20,11 +20,11 @@ export default function MotifModal({
         const data = await MotifService.getMotifs();
         const combined = [
           ...data,
-          ...imagesUrl.map((url, index) => ({
-            id: `local-${index}`,
-            image_url: url,
-            title: `Batik Lokal ${index + 1}`,
-          })),
+          // ...imagesUrl.map((url, index) => ({
+          //   id: `local-${index}`,
+          //   image_url: url,
+          //   title: `Batik Lokal ${index + 1}`,
+          // })),
         ];
 
         setMotifs(combined);
