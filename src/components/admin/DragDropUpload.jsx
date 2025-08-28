@@ -102,7 +102,7 @@ const DragDropUpload = ({ onFileSelect, selectedFile, onRemove, isRequired = fal
   return (
     <div className="w-full">
       <label className="block text-sm font-medium text-gray-300 mb-2">
-        Gambar Motif {isRequired && <span className="text-red-400">*</span>}
+        Gambar {isRequired && <span className="text-red-400">*</span>}
       </label>
 
       {selectedFile ? (

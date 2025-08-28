@@ -1,12 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "../layout/MainLayout";
-import Index from "../pages/LandingPage/Index";
-import MotifPage from "../pages/LandingPage/Motif/MotifPage";
-import { GalleryPage } from "../pages/LandingPage/Gallery/GalleryPage";
-import BlogPage from "../pages/LandingPage/Blogs/BlogPage";
-import MotifBatik from "../pages/admin/motif/Index";
-import Home from "../pages/LandingPage/Model_3D";
 import AdminLayout from "../layout/AdminLayout";
+import MainLayout from "../layout/MainLayout";
+import GalleryDashboard from "../pages/admin/galery";
+import MotifBatik from "../pages/admin/motif/Index";
+import BlogPage from "../pages/LandingPage/Blogs/BlogPage";
+import { GalleryPage } from "../pages/LandingPage/Gallery/GalleryPage";
+import Index from "../pages/LandingPage/Index";
+import Home from "../pages/LandingPage/Model_3D";
+import MotifPage from "../pages/LandingPage/Motif/MotifPage";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: "motif-batik",
         element: <MotifBatik />,
+      },
+      {
+        path: "gallery",
+        element: <GalleryDashboard />,
       },
     ],
   },
