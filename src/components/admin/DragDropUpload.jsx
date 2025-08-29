@@ -1,120 +1,80 @@
-import { PictureInPicture, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Cuboid, PictureInPicture, Upload, X } from "lucide-react";
+import { useRef, useState } from "react";
 
-const MAX_FILE_SIZE_MB = 2;
-const MAX_FILE_NAME_LENGTH = 50;
-const MAX_WIDTH = 400;
-const MAX_HEIGHT = 400;
-
-const DragDropUpload = ({ onFileSelect, selectedFile, onRemove, isRequired = false }) => {
+const DragDropUpload = ({
+  onFileSelect,
+  selectedFile,
+  onRemove,
+  isRequired = false,
+  maxFileSizeMB = 5,
+  accept = "*", // default izinkan semua
+}) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [error, setError] = useState("");
   const fileInputRef = useRef();
 
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-
-    const files = e.dataTransfer.files;
-    if (files.length > 0) handleFile(files[0]);
-  };
-
-  const handleFileInputChange = (e) => {
-    const file = e.target.files[0];
-    if (file) handleFile(file);
-  };
-
   const handleFile = (file) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+    setError("");
+
+    // validasi ekstensi & mime
+    if (accept !== "*" && accept !== "") {
+      const allowedTypes = accept.split(",").map((a) => a.trim().toLowerCase());
+      const fileType = file.type?.toLowerCase() || "";
+      const fileExt = "." + file.name.split(".").pop().toLowerCase();
+
+      const isAllowed =
+        allowedTypes.includes(fileType) ||
+        allowedTypes.includes(fileExt) ||
+        allowedTypes.some(
+          (a) => a.endsWith("/*") && fileType.startsWith(a.replace("/*", ""))
+        );
+
+      if (!isAllowed) {
+        setError("Format file tidak didukung!");
+        return;
+      }
+    }
+
+    // validasi size
+    if (file.size / 1024 / 1024 > maxFileSizeMB) {
+      setError(`File terlalu besar! Maksimal ${maxFileSizeMB} MB`);
       return;
     }
 
-    if (file.size / 1024 / 1024 > MAX_FILE_SIZE_MB) {
-      alert(`File terlalu besar! Maksimal ${MAX_FILE_SIZE_MB} MB`);
-      return;
+    onFileSelect(file);
+  };
+
+  const getPreviewUrl = (file) => {
+    const imageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (imageTypes.includes(file.type)) {
+      return URL.createObjectURL(file);
     }
-
-    resizeImage(file, (resizedFile) => {
-      onFileSelect(resizedFile);
-    });
+    return null; // kalau bukan image
   };
 
-  const resizeImage = (file, callback) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
-          width = width * ratio;
-          height = height * ratio;
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          const resizedFile = new File([blob], file.name, { type: file.type });
-          callback(resizedFile);
-        }, file.type, 0.8);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const getPreviewUrl = (file) => URL.createObjectURL(file);
-
-  const shortenFileName = (name) => {
-    return name.length > MAX_FILE_NAME_LENGTH
-      ? name.substring(0, MAX_FILE_NAME_LENGTH) + '...'
-      : name;
-  };
+  const shortenFileName = (name) =>
+    name.length > 50 ? name.substring(0, 50) + "..." : name;
 
   return (
     <div className="w-full">
       <label className="block text-sm font-medium text-gray-300 mb-2">
-        Gambar {isRequired && <span className="text-red-400">*</span>}
+        File {isRequired && <span className="text-red-400">*</span>}
       </label>
 
       {selectedFile ? (
         <div className="relative">
           <div className="bg-gray-900 border-2 border-gray-700 rounded-lg p-4">
             <div className="flex items-center space-x-4">
-              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-800">
-                <img
-                  src={getPreviewUrl(selectedFile)}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-800 flex items-center justify-center">
+                {getPreviewUrl(selectedFile) ? (
+                  <img
+                    src={getPreviewUrl(selectedFile)}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Cuboid className="w-8 h-8 text-gray-400" />
+                )}
               </div>
               <div className="flex-1">
                 <p className="text-white text-sm font-medium">
@@ -136,20 +96,33 @@ const DragDropUpload = ({ onFileSelect, selectedFile, onRemove, isRequired = fal
         </div>
       ) : (
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${isDragOver
-            ? 'border-blue-500 bg-blue-500/10'
-            : 'border-gray-600 hover:border-gray-500 hover:bg-gray-900/50'
-            }`}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={handleClick}
+          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
+            isDragOver
+              ? "border-blue-500 bg-blue-500/10"
+              : "border-gray-600 hover:border-gray-500 hover:bg-gray-900/50"
+          }`}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            setIsDragOver(true);
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            setIsDragOver(false);
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragOver(false);
+            if (e.dataTransfer.files.length > 0)
+              handleFile(e.dataTransfer.files[0]);
+          }}
+          onClick={() => fileInputRef.current?.click()}
         >
           <div className="flex flex-col items-center space-y-4">
             <div
-              className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${isDragOver ? 'bg-blue-500/20' : 'bg-gray-800'
-                }`}
+              className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
+                isDragOver ? "bg-blue-500/20" : "bg-gray-800"
+              }`}
             >
               {isDragOver ? (
                 <Upload className="w-8 h-8 text-blue-400" />
@@ -159,28 +132,32 @@ const DragDropUpload = ({ onFileSelect, selectedFile, onRemove, isRequired = fal
             </div>
             <div>
               <p className="text-white text-lg font-medium mb-2">
-                {isDragOver ? 'Drop your image here' : 'Upload Image'}
+                {isDragOver ? "Drop your file here" : "Upload File"}
               </p>
               <p className="text-gray-400 text-sm">
-                Drag and drop your image here, or click to browse
+                Drag & drop atau klik untuk pilih file
               </p>
               <p className="text-gray-500 text-xs mt-2">
-                Supports: JPG, PNG, GIF (Max 2MB)
+                Supports: Semua file (Max {maxFileSizeMB}MB)
               </p>
             </div>
           </div>
         </div>
       )}
 
+      {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
-        onChange={handleFileInputChange}
+        accept={accept}
+        onChange={(e) => {
+          if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        }}
         className="hidden"
       />
     </div>
   );
 };
 
-export default DragDropUpload;
+export default DragDropUpload

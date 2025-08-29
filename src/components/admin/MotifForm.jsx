@@ -1,30 +1,32 @@
-import { Loader2, Plus } from 'lucide-react';
-import { useState } from 'react';
-import DragDropUpload from './DragDropUpload';
+import { Loader2, Plus } from "lucide-react";
+import { useState } from "react";
+import DragDropUpload from "./DragDropUpload";
+import TextareaInput from "../TextareaInput";
+import TextInput from "../TextInput";
 
 const MotifForm = ({ onSubmit, loading }) => {
   const [form, setForm] = useState({
-    title: '',
-    description: '',
-    image: null
+    title: "",
+    description: "",
+    image: null,
   });
 
   const handleInputChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleFileSelect = (file) => {
-    setForm(prev => ({ ...prev, image: file }));
+    setForm((prev) => ({ ...prev, image: file }));
   };
 
   const handleRemoveFile = () => {
-    setForm(prev => ({ ...prev, image: null }));
+    setForm((prev) => ({ ...prev, image: null }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSubmit(form);
-    setForm({ title: '', description: '', image: null });
+    setForm({ title: "", description: "", image: null });
   };
 
   // const isFormValid = form.title.trim() && form.description.trim();
@@ -43,30 +45,23 @@ const MotifForm = ({ onSubmit, loading }) => {
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Judul Motif <span className="text-red-400">*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Masukkan nama motif (harus unik)"
+          <TextInput
+            label="Judul Motif"
             value={form.title}
-            onChange={(e) => handleInputChange('title', e.target.value)}
-            className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-
+            onChange={(val) => handleInputChange("title", val)}
+            placeholder="Masukkan nama motif (harus unik)"
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Deskripsi <span className="text-red-400">*</span>
-          </label>
-          <textarea
-            placeholder="Ceritakan tentang motif ini, sejarah, filosofi, atau makna khususnya..."
+          <TextareaInput
+            label="Deskripsi"
             value={form.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
+            onChange={(val) => handleInputChange("description", val)}
+            placeholder="Ceritakan tentang motif ini, sejarah, filosofi, atau makna khususnya..."
             rows={4}
-            className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-
+            required
           />
         </div>
 
@@ -75,6 +70,7 @@ const MotifForm = ({ onSubmit, loading }) => {
           selectedFile={form.image}
           onRemove={handleRemoveFile}
           isRequired={true}
+          accept="image/jpeg,image/png,image/gif"
         />
 
         <div className="flex justify-end pt-4 border-t border-gray-800">

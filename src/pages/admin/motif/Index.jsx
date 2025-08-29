@@ -29,14 +29,8 @@ class MotifDashboard extends React.Component {
       submitting: false,
       editing: false,
       notification: null,
-      editModal: {
-        isOpen: false,
-        motif: null,
-      },
-      confirmModal: {
-        isOpen: false,
-        motif: null,
-      },
+      editModal: { isOpen: false, motif: null },
+      confirmModal: { isOpen: false, motif: null },
     };
   }
 
@@ -46,9 +40,7 @@ class MotifDashboard extends React.Component {
 
   showNotification = (message, type = "success") => {
     this.setState({ notification: { message, type } });
-    setTimeout(() => {
-      this.setState({ notification: null });
-    }, 5000);
+    setTimeout(() => this.setState({ notification: null }), 5000);
   };
 
   loadMotifs = async () => {
@@ -57,42 +49,36 @@ class MotifDashboard extends React.Component {
       const motifs = await MotifService.getMotifs();
       this.setState({ motifs });
     } catch (error) {
-      console.error("Error loading motifs:", error);
       this.showNotification("Gagal memuat data motif", "error");
     } finally {
       this.setState({ loading: false });
     }
   };
 
-
-
   handleSubmit = async (formData) => {
     this.setState({ submitting: true });
     try {
       let imageUrl = null;
-      if (formData.image) {
+      if (formData.image)
         imageUrl = await MotifService.uploadImage(formData.image);
-      }
+
       const motifData = {
         title: formData.title,
         description: formData.description,
         image_url: imageUrl ?? "",
       };
-
       motifSchema.parse(motifData);
 
       await MotifService.createMotif(motifData);
       this.showNotification("Motif berhasil ditambahkan!");
       this.loadMotifs();
     } catch (error) {
-
       if (error instanceof z.ZodError) {
-        error.issues.forEach((err) => {
-          this.showNotification(err.message, "error");
-        });
+        error.issues.forEach((err) =>
+          this.showNotification(err.message, "error")
+        );
         return;
       }
-
       this.showNotification(
         error.message.includes("duplicate")
           ? "Judul motif sudah ada, gunakan judul yang berbeda"
@@ -109,57 +95,37 @@ class MotifDashboard extends React.Component {
       await MotifService.deleteMotif(id);
       this.showNotification("Motif berhasil dihapus");
       this.loadMotifs();
-    } catch (error) {
-      console.error("Error deleting motif:", error);
+    } catch {
       this.showNotification("Gagal menghapus motif", "error");
     }
   };
 
-  openEditModal = (motif) => {
-    this.setState({
-      editModal: { isOpen: true, motif },
-    });
-  };
-
-  closeEditModal = () => {
-    this.setState({
-      editModal: { isOpen: false, motif: null },
-    });
-  };
-
-  openConfirmModal = (id, title) => {
-    this.setState({
-      confirmModal: { isOpen: true, motif: { id, title } },
-    });
-  };
-
-  closeConfirmModal = () => {
-    this.setState({
-      confirmModal: { isOpen: false, motif: null },
-    });
-  };
+  openEditModal = (motif) =>
+    this.setState({ editModal: { isOpen: true, motif } });
+  closeEditModal = () =>
+    this.setState({ editModal: { isOpen: false, motif: null } });
+  openConfirmModal = (id, title) =>
+    this.setState({ confirmModal: { isOpen: true, motif: { id, title } } });
+  closeConfirmModal = () =>
+    this.setState({ confirmModal: { isOpen: false, motif: null } });
 
   handleConfirmDelete = () => {
     const { confirmModal } = this.state;
-    if (confirmModal.motif) {
-      this.handleDelete(confirmModal.motif.id);
-    }
+    if (confirmModal.motif) this.handleDelete(confirmModal.motif.id);
   };
 
   handleEditSave = async (id, updateData) => {
     this.setState({ editing: true });
     try {
       let imageUrl = null;
-      if (updateData.newImage) {
+      if (updateData.newImage)
         imageUrl = await MotifService.uploadImage(updateData.newImage);
-      }
 
       const payload = {
         title: updateData.title,
         description: updateData.description,
         ...(imageUrl && { image_url: imageUrl }),
       };
-
       editMotifSchema.parse(payload);
 
       await MotifService.updateMotif(id, payload);
@@ -167,14 +133,12 @@ class MotifDashboard extends React.Component {
       this.closeEditModal();
       this.loadMotifs();
     } catch (error) {
-
       if (error instanceof z.ZodError) {
-        error.issues.forEach((err) => {
-          this.showNotification(err.message, "error");
-        });
+        error.issues.forEach((err) =>
+          this.showNotification(err.message, "error")
+        );
         return;
       }
-
       this.showNotification(
         error.message.includes("duplicate")
           ? "Judul motif sudah ada, gunakan judul yang berbeda"
@@ -200,13 +164,12 @@ class MotifDashboard extends React.Component {
     return (
       <div className="min-h-screen bg-black">
         <Notification notification={notification} />
-
         <main className="max-w-7xl mx-auto px-6 py-8">
           <div className="space-y-8">
             <div className="text-center flex flex-col gap-2 justify-center">
               <BlurText
                 text="Dashboard Motif Batik"
-                delay={3000}
+                delay={1000}
                 animateBy="words"
                 direction="top"
                 className="text-4xl font-bold text-white mb-4 text-center mx-auto"
@@ -216,11 +179,9 @@ class MotifDashboard extends React.Component {
                 dan hapus motif sesuai kebutuhan.
               </p>
             </div>
-
             <div className="max-w-2xl mx-auto">
               <MotifForm onSubmit={this.handleSubmit} loading={submitting} />
             </div>
-
             <div>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-white mb-2">
@@ -230,7 +191,6 @@ class MotifDashboard extends React.Component {
                   Semua motif batik yang telah Anda buat
                 </p>
               </div>
-
               <DataGrid
                 items={motifs}
                 onDelete={this.openConfirmModal}
@@ -240,7 +200,6 @@ class MotifDashboard extends React.Component {
             </div>
           </div>
         </main>
-
         <EditMotifModal
           isOpen={editModal.isOpen}
           motif={editModal.motif}
@@ -248,7 +207,6 @@ class MotifDashboard extends React.Component {
           onSave={this.handleEditSave}
           loading={editing}
         />
-
         <ConfirmModal
           isOpen={confirmModal.isOpen}
           onClose={this.closeConfirmModal}

@@ -9,18 +9,18 @@
     "id": 3,
     "label": "Model",
     "path": "/admin/models",
-    "icon": "PencilRuler"
+    "icon": "User"
   },
   {
-    "id": 3,
-    "label": "Blogs",
-    "path": "/admin/models",
-    "icon": "PencilRuler"
+    "id": 4,
+    "label": "Artikel",
+    "path": "/admin/artikel",
+    "icon": "FileText"
   },
   {
-    "id": 3,
+    "id": 5,
     "label": "Gallery",
     "path": "/admin/gallery",
-    "icon": "PencilRuler"
+    "icon": "Image"
   }
 ]

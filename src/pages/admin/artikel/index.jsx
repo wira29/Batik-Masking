@@ -1,47 +1,51 @@
 import React from "react";
 import z from "zod";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
-import EditGalleryModal from "../../../components/admin/EditGalleryModal";
-import GalleryForm from "../../../components/admin/GalleryForm";
+import ArtikelForm from "../../../components/admin/ArtikelForm";
 import Notification from "../../../components/Notification";
 import BlurText from "../../../components/react-bits/BlurText/BlurText";
-import GalleryService from "../../../services/GalleryService";
 import DataGrid from "../../../components/admin/DataGrid";
+import EditArtikelModal from "../../../components/admin/EditArtikelModal";
+import ArtikelService from "../../../services/ArticleService"
 
-const gallerySchema = z.object({
-  title: z.string().min(1, { message: "Nama wajib diisi" }),
+const artikelSchema = z.object({
+  title: z.string().min(1, { message: "Judul wajib diisi" }),
   description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
   image_url: z.string().min(1, { message: "Gambar wajib diisi" }),
+  slug: z.string().min(1, { message: "Slug wajib diisi" }),
+  author: z.string().min(1, { message: "Author wajib diisi" }),
 });
 
-const editGallerySchema = z.object({
-  title: z.string().min(1, { message: "Nama wajib diisi" }),
+const editArtikelSchema = z.object({
+  title: z.string().min(1, { message: "Judul wajib diisi" }),
   description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
-  image_url: z.string().min(1, { message: "Gambar wajib diisi" }).optional(),
+  image_url: z.string().optional(),
+  slug: z.string().min(1, { message: "Slug wajib diisi" }),
+  author: z.string().min(1, { message: "Author wajib diisi" }),
 });
 
-class GalleryDashboard extends React.Component {
+class ArtikelDashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      gallery: [],
+      artikels: [],
       loading: false,
       submitting: false,
       editing: false,
       notification: null,
       editModal: {
         isOpen: false,
-        gallery: null,
+        artikel: null,
       },
       confirmModal: {
         isOpen: false,
-        gallery: null,
+        artikel: null,
       },
     };
   }
 
   componentDidMount() {
-    this.loadGallery();
+    this.loadArtikels();
   }
 
   showNotification = (message, type = "success") => {
@@ -51,14 +55,14 @@ class GalleryDashboard extends React.Component {
     }, 5000);
   };
 
-  loadGallery = async () => {
+  loadArtikels = async () => {
     this.setState({ loading: true });
     try {
-      const gallery = await GalleryService.getGallery();
-      this.setState({ gallery });
+      const artikels = await ArtikelService.getArticles();
+      this.setState({ artikels });
     } catch (error) {
-      console.error("Error loading gallery:", error);
-      this.showNotification("Gagal memuat data gallery", "error");
+      console.error("Error loading artikels:", error);
+      this.showNotification("Gagal memuat data artikel", "error");
     } finally {
       this.setState({ loading: false });
     }
@@ -69,19 +73,22 @@ class GalleryDashboard extends React.Component {
     try {
       let imageUrl = null;
       if (formData.image) {
-        imageUrl = await GalleryService.uploadImage(formData.image);
+        imageUrl = await ArtikelService.uploadImage(formData.image);
       }
-      const galleryData = {
+
+      const artikelData = {
         title: formData.title,
         description: formData.description,
+        slug: formData.slug,
+        author: formData.author,
         image_url: imageUrl ?? "",
       };
 
-      gallerySchema.parse(galleryData);
+      artikelSchema.parse(artikelData);
 
-      await GalleryService.createGalleryItem(galleryData);
-      this.showNotification("Gallery berhasil ditambahkan!");
-      this.loadGallery();
+      await ArtikelService.createArticle(artikelData);
+      this.showNotification("Artikel berhasil ditambahkan!");
+      this.loadArtikels();
     } catch (error) {
       if (error instanceof z.ZodError) {
         error.issues.forEach((err) => {
@@ -92,8 +99,8 @@ class GalleryDashboard extends React.Component {
 
       this.showNotification(
         error.message.includes("duplicate")
-          ? "Judul gallery sudah ada, gunakan judul yang berbeda"
-          : "Gagal menyimpan gallery. Silakan coba lagi.",
+          ? "Judul artikel sudah ada, gunakan judul yang berbeda"
+          : "Gagal menyimpan artikel. Silakan coba lagi.",
         "error"
       );
     } finally {
@@ -103,43 +110,43 @@ class GalleryDashboard extends React.Component {
 
   handleDelete = async (id) => {
     try {
-      await GalleryService.deleteGalleryItem(id);
-      this.showNotification("Gallery berhasil dihapus");
-      this.loadGallery();
+      await ArtikelService.deleteArticle(id);
+      this.showNotification("Artikel berhasil dihapus");
+      this.loadArtikels();
     } catch (error) {
-      console.error("Error deleting gallery:", error);
-      this.showNotification("Gagal menghapus gallery", "error");
+      console.error("Error deleting artikel:", error);
+      this.showNotification("Gagal menghapus artikel", "error");
     }
   };
 
-  openEditModal = (gallery) => {
+  openEditModal = (artikel) => {
     this.setState({
-      editModal: { isOpen: true, gallery },
+      editModal: { isOpen: true, artikel },
     });
   };
 
   closeEditModal = () => {
     this.setState({
-      editModal: { isOpen: false, gallery: null },
+      editModal: { isOpen: false, artikel: null },
     });
   };
 
   openConfirmModal = (id, title) => {
     this.setState({
-      confirmModal: { isOpen: true, gallery: { id, title } },
+      confirmModal: { isOpen: true, artikel: { id, title } },
     });
   };
 
   closeConfirmModal = () => {
     this.setState({
-      confirmModal: { isOpen: false, gallery: null },
+      confirmModal: { isOpen: false, artikel: null },
     });
   };
 
   handleConfirmDelete = () => {
     const { confirmModal } = this.state;
-    if (confirmModal.gallery) {
-      this.handleDelete(confirmModal.gallery.id);
+    if (confirmModal.artikel) {
+      this.handleDelete(confirmModal.artikel.id);
     }
   };
 
@@ -148,21 +155,23 @@ class GalleryDashboard extends React.Component {
     try {
       let imageUrl = null;
       if (updateData.newImage) {
-        imageUrl = await GalleryService.uploadImage(updateData.newImage);
+        imageUrl = await ArtikelService.uploadImage(updateData.newImage);
       }
 
       const payload = {
         title: updateData.title,
         description: updateData.description,
+        slug: updateData.slug,
+        author: updateData.author,
         ...(imageUrl && { image_url: imageUrl }),
       };
 
-      editGallerySchema.parse(payload);
+      editArtikelSchema.parse(payload);
 
-      await GalleryService.updateGalleryItem(id, payload);
-      this.showNotification("Gallery berhasil diperbarui!");
+      await ArtikelService.updateArticle(id, payload);
+      this.showNotification("Artikel berhasil diperbarui!");
       this.closeEditModal();
-      this.loadGallery();
+      this.loadArtikels();
     } catch (error) {
       if (error instanceof z.ZodError) {
         error.issues.forEach((err) => {
@@ -173,8 +182,8 @@ class GalleryDashboard extends React.Component {
 
       this.showNotification(
         error.message.includes("duplicate")
-          ? "Judul gallery sudah ada, gunakan judul yang berbeda"
-          : "Gagal memperbarui gallery. Silakan coba lagi.",
+          ? "Judul artikel sudah ada, gunakan judul yang berbeda"
+          : "Gagal memperbarui artikel. Silakan coba lagi.",
         "error"
       );
     } finally {
@@ -184,7 +193,7 @@ class GalleryDashboard extends React.Component {
 
   render() {
     const {
-      gallery,
+      artikels,
       loading,
       submitting,
       editing,
@@ -201,34 +210,33 @@ class GalleryDashboard extends React.Component {
           <div className="space-y-8">
             <div className="text-center flex flex-col gap-2 justify-center">
               <BlurText
-                text="Dashboard Gallery"
+                text="Dashboard Artikel"
                 delay={1000}
                 animateBy="words"
                 direction="top"
                 className="text-4xl font-bold text-white mb-4 text-center mx-auto"
               />
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Kelola koleksi gallery batik Anda dengan mudah. Tambahkan, edit,
-                dan hapus sesuai kebutuhan.
+                Kelola artikel Anda dengan mudah. Tambahkan, edit, dan hapus artikel sesuai kebutuhan.
               </p>
             </div>
 
             <div className="max-w-2xl mx-auto">
-              <GalleryForm onSubmit={this.handleSubmit} loading={submitting} />
+              <ArtikelForm onSubmit={this.handleSubmit} loading={submitting} />
             </div>
 
             <div>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-white mb-2">
-                  Koleksi Gallery
+                  Semua Artikel
                 </h2>
                 <p className="text-gray-400">
-                  Semua gallery yang telah Anda buat
+                  Semua artikel yang telah Anda buat
                 </p>
               </div>
 
-              <DataGrid
-                items={gallery}
+              <DataGrid 
+                items={artikels}
                 onDelete={this.openConfirmModal}
                 onEdit={this.openEditModal}
                 loading={loading}
@@ -237,9 +245,9 @@ class GalleryDashboard extends React.Component {
           </div>
         </main>
 
-        <EditGalleryModal
+        <EditArtikelModal
           isOpen={editModal.isOpen}
-          gallery={editModal.gallery}
+          artikel={editModal.artikel}
           onClose={this.closeEditModal}
           onSave={this.handleEditSave}
           loading={editing}
@@ -249,8 +257,8 @@ class GalleryDashboard extends React.Component {
           isOpen={confirmModal.isOpen}
           onClose={this.closeConfirmModal}
           onConfirm={this.handleConfirmDelete}
-          title="Hapus Gallery"
-          message={`Apakah Anda yakin ingin menghapus gallery "${confirmModal.gallery?.title}"? Tindakan ini tidak dapat dibatalkan.`}
+          title="Hapus Artikel"
+          message={`Apakah Anda yakin ingin menghapus artikel "${confirmModal.artikel?.title}"? Tindakan ini tidak dapat dibatalkan.`}
           confirmText="Ya, Hapus"
           cancelText="Batal"
           type="danger"
@@ -260,4 +268,4 @@ class GalleryDashboard extends React.Component {
   }
 }
 
-export default GalleryDashboard;
+export default ArtikelDashboard;

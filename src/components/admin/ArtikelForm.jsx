@@ -3,16 +3,29 @@ import { useState } from "react";
 import DragDropUpload from "./DragDropUpload";
 import TextInput from "../TextInput";
 import TextareaInput from "../TextareaInput";
+import TextEditor from "../TextEditor";
 
-const GalleryForm = ({ onSubmit, loading }) => {
+const ArtikelForm = ({ onSubmit, loading }) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
+    author: "Unknown",
     image: null,
+    slug: "",
   });
 
   const handleInputChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    let newForm = { ...form, [field]: value };
+
+    if (field === "title") {
+      newForm.slug = value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
+    }
+
+    setForm(newForm);
   };
 
   const handleFileSelect = (file) => {
@@ -26,7 +39,7 @@ const GalleryForm = ({ onSubmit, loading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSubmit(form);
-    setForm({ title: "", description: "", image: null });
+    setForm({ title: "", description: "", author: "", image: null, slug: "" });
   };
 
   return (
@@ -34,34 +47,48 @@ const GalleryForm = ({ onSubmit, loading }) => {
       <div className="px-6 py-4 border-b border-gray-800 bg-gradient-to-r from-purple-900/20 to-blue-900/20">
         <h2 className="text-xl font-bold text-white flex items-center space-x-2">
           <Plus className="w-5 h-5" />
-          <span>Tambah Gambar Baru</span>
+          <span>Tambah Artikel Baru</span>
         </h2>
         <p className="text-gray-400 text-sm mt-1">
-          Tambah gambar baru untuk koleksi galeri anda
+          Tambah artikel baru untuk koleksi galeri Anda
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        <div>
+        <div className="grid grid-cols-2 gap-4">
           <TextInput
             label="Judul"
             value={form.title}
             onChange={(val) => handleInputChange("title", val)}
-            placeholder="Masukkan judul gambar"
+            placeholder="Masukkan judul artikel"
+            required
+          />
+
+          <TextInput
+            label="Slug"
+            value={form.slug}
+            onChange={(val) => handleInputChange("slug", val)}
+            placeholder="Slug artikel (otomatis dari judul)"
+            required
+            readOnly
+          />
+
+          <TextInput
+            label="Author"
+            value={form.author}
+            onChange={(val) => handleInputChange("author", val)}
+            placeholder="Masukkan nama author"
             required
           />
         </div>
 
-        <div>
-          <TextareaInput
-            label="Deskripsi"
-            value={form.description}
-            onChange={(val) => handleInputChange("description", val)}
-            placeholder="Masukkan deskripsi gambar"
-            rows={3}
-            required
-          />
-        </div>
+        <TextEditor
+          label="description"
+          value={form.description}
+          onChange={(val) => handleInputChange("description", val)}
+          placeholder="Masukkan deskripsi artikel"
+          required
+        />
 
         <DragDropUpload
           onFileSelect={handleFileSelect}
@@ -85,7 +112,7 @@ const GalleryForm = ({ onSubmit, loading }) => {
             ) : (
               <>
                 <Plus className="w-4 h-4" />
-                <span>Tambah Gambar</span>
+                <span>Tambah Artikel</span>
               </>
             )}
           </button>
@@ -95,4 +122,4 @@ const GalleryForm = ({ onSubmit, loading }) => {
   );
 };
 
-export default GalleryForm;
+export default ArtikelForm;

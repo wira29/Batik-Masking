@@ -8,6 +8,8 @@ import { GalleryPage } from "../pages/LandingPage/Gallery/GalleryPage";
 import Index from "../pages/LandingPage/Index";
 import Home from "../pages/LandingPage/Model_3D";
 import MotifPage from "../pages/LandingPage/Motif/MotifPage";
+import ArtikelDashboard from "../pages/admin/artikel";
+import ModelDashboard from "../pages/admin/model";
 
 export const router = createBrowserRouter([
   {
@@ -27,7 +29,7 @@ export const router = createBrowserRouter([
         element: <GalleryPage />,
       },
       {
-        path: "/blogs",
+        path: "/artikel",
         element: <BlogPage />,
       },
     ],
@@ -43,6 +45,14 @@ export const router = createBrowserRouter([
       {
         path: "gallery",
         element: <GalleryDashboard />,
+      },
+      {
+        path: "artikel",
+        element: <ArtikelDashboard />,
+      },
+      {
+        path: "models",
+        element: <ModelDashboard />,
       },
     ],
   },

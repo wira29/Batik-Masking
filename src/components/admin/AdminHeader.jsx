@@ -1,15 +1,8 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Grid2X2, Palette, TreePalm, Menu, X, PencilRuler } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import menuData from "../../assets/data/adminMenu.json";
-
-
-const icons = {
-  Palette,
-  Grid2X2,
-  PencilRuler,
-};
+import * as LucideIcons from "lucide-react";
 
 const AdminHeader = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -19,7 +12,7 @@ const AdminHeader = () => {
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
-            <TreePalm className="w-6 h-6 text-white" />
+            <LucideIcons.TreePalm className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Batik Dashboard</h1>
@@ -29,7 +22,7 @@ const AdminHeader = () => {
 
         <nav className="hidden md:flex items-center space-x-4">
           {menuData.map((item) => {
-            const Icon = icons[item.icon] || Grid2X2;
+            const Icon = LucideIcons[item.icon];
             return (
               <NavLink
                 key={item.id}
@@ -54,7 +47,11 @@ const AdminHeader = () => {
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden text-white"
         >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {mobileOpen ? (
+            <LucideIcons.X className="w-6 h-6" />
+          ) : (
+            <LucideIcons.Menu className="w-6 h-6" />
+          )}
         </button>
       </div>
 
@@ -69,22 +66,20 @@ const AdminHeader = () => {
             className="md:hidden bg-black border-t border-gray-700 px-6 py-4 space-y-3"
           >
             {menuData.map((item) => {
-              const Icon = icons[item.icon] || Grid2X2;
-              const isActive = location.pathname === item.path
+              const Icon = LucideIcons[item.icon];
+              const isActive = location.pathname === item.path;
 
               return (
                 <NavLink
                   key={item.id}
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
-                  className={
-                    `flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors
                      ${
                        isActive
                          ? "bg-white text-black font-semibold"
                          : "text-white hover:bg-gray-800"
-                     }`
-                  }
+                     }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{item.label}</span>
