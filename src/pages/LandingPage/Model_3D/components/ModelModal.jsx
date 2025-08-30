@@ -1,29 +1,28 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import ModelService from "../../../../services/ModelService";
+import LoadingGrid from "../../../../components/LoadingGrid";
 
-export default function ModelModal({
-  dataModel = [],
-  setOpenModel,
-  selectModel,
-}) {
+export default function ModelModal({ setOpenModel, selectModel }) {
   const [models, setModels] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchModels = async () => {
       try {
+        setLoading(true);
         const res = await ModelService.getModels();
         if (res) {
           setModels(res);
         }
       } catch (err) {
         console.error("Gagal mengambil model dari DB:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchModels();
   }, []);
-
-  const combinedData = [...dataModel, ...models];
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -41,21 +40,25 @@ export default function ModelModal({
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-5 p-5 overflow-hidden">
-          {combinedData.map((data, index) => (
-            <div
-              key={index + 1}
-              onClick={() => selectModel(data.model, data.layout)}
-              className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden"
-            >
-              <img
-                src={data.file_url}
-                alt={`Model | ${data.file_url}`}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <LoadingGrid />
+        ) : (
+          <div className="grid grid-cols-5 gap-5 p-5 overflow-hidden">
+            {models.map((data, index) => (
+              <div
+                key={index + 1}
+                onClick={() => selectModel(data.file_url, data.layout_url)}
+                className="bg-black border border-slate-200/[0.5] hover:scale-105 cursor-pointer transition-all duration-200 ease-in-out rounded-lg w-44 h-44 overflow-hidden"
+              >
+                <img
+                  src={data.preview_url}
+                  alt={`Model | ${data.file_url}`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import Notification from "../../../components/Notification";
 import BlurText from "../../../components/react-bits/BlurText/BlurText";
 import DataGrid from "../../../components/admin/DataGrid";
 import EditArtikelModal from "../../../components/admin/EditArtikelModal";
-import ArtikelService from "../../../services/ArticleService"
+import ArtikelService from "../../../services/ArticleService";
 
 const artikelSchema = z.object({
   title: z.string().min(1, { message: "Judul wajib diisi" }),
@@ -152,10 +152,11 @@ class ArtikelDashboard extends React.Component {
 
   handleEditSave = async (id, updateData) => {
     this.setState({ editing: true });
+    
     try {
       let imageUrl = null;
-      if (updateData.newImage) {
-        imageUrl = await ArtikelService.uploadImage(updateData.newImage);
+      if (updateData.image_url) {
+        imageUrl = await ArtikelService.uploadImage(updateData.image_url);
       }
 
       const payload = {
@@ -217,7 +218,8 @@ class ArtikelDashboard extends React.Component {
                 className="text-4xl font-bold text-white mb-4 text-center mx-auto"
               />
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Kelola artikel Anda dengan mudah. Tambahkan, edit, dan hapus artikel sesuai kebutuhan.
+                Kelola artikel Anda dengan mudah. Tambahkan, edit, dan hapus
+                artikel sesuai kebutuhan.
               </p>
             </div>
 
@@ -235,7 +237,7 @@ class ArtikelDashboard extends React.Component {
                 </p>
               </div>
 
-              <DataGrid 
+              <DataGrid
                 items={artikels}
                 onDelete={this.openConfirmModal}
                 onEdit={this.openEditModal}

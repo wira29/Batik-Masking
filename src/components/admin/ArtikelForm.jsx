@@ -95,6 +95,7 @@ const ArtikelForm = ({ onSubmit, loading }) => {
           selectedFile={form.image}
           onRemove={handleRemoveFile}
           isRequired={true}
+          maxFileSizeMB={1}
           accept="image/jpeg,image/png,image/gif"
         />
 

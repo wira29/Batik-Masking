@@ -66,15 +66,17 @@ class GalleryDashboard extends React.Component {
 
   handleSubmit = async (formData) => {
     this.setState({ submitting: true });
+    
     try {
       let imageUrl = null;
       if (formData.image) {
         imageUrl = await GalleryService.uploadImage(formData.image);
       }
+
       const galleryData = {
         title: formData.title,
         description: formData.description,
-        image_url: imageUrl ?? "",
+        image_url: imageUrl,
       };
 
       gallerySchema.parse(galleryData);
@@ -145,10 +147,11 @@ class GalleryDashboard extends React.Component {
 
   handleEditSave = async (id, updateData) => {
     this.setState({ editing: true });
+    
     try {
       let imageUrl = null;
-      if (updateData.newImage) {
-        imageUrl = await GalleryService.uploadImage(updateData.newImage);
+      if (updateData.image_url) {
+        imageUrl = await GalleryService.uploadImage(updateData.image_url);
       }
 
       const payload = {

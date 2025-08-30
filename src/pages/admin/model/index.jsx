@@ -10,10 +10,23 @@ import ModelForm from "../../../components/admin/ModelForm";
 
 const modelSchema = z.object({
   file_url: z.string().min(1, { message: "File OBJ wajib diupload" }),
+  layout_url: z.string().min(1, { message: "Layout wajib diupload" }),
+  preview_url: z.string().min(1, { message: "Preview wajib diupload" }),
 });
 
 const editModelSchema = z.object({
-  file_url: z.string().min(1, { message: "File OBJ wajib diupload" }).optional(),
+  file_url: z
+    .string()
+    .min(1, { message: "File OBJ wajib diupload" })
+    .optional(),
+  layout_url: z
+    .string()
+    .min(1, { message: "Layout wajib diupload" })
+    .optional(),
+  preview_url: z
+    .string()
+    .min(1, { message: "Preview wajib diupload" })
+    .optional(),
 });
 
 class ModelDashboard extends React.Component {
@@ -24,6 +37,7 @@ class ModelDashboard extends React.Component {
       loading: false,
       submitting: false,
       editing: false,
+      deletingId: null,
       notification: null,
       editModal: {
         isOpen: false,
@@ -63,33 +77,47 @@ class ModelDashboard extends React.Component {
   handleSubmit = async (formData) => {
     this.setState({ submitting: true });
     try {
-      let fileUrl = null;
-      if (formData.file) {
-        fileUrl = await ModelService.uploadFile(formData.file);
-      }
+      const fileUrl = formData.file
+        ? await ModelService.uploadFile(formData.file)
+        : null;
+      const layoutUrl = formData.layout
+        ? await ModelService.uploadFile(formData.layout)
+        : null;
+      const previewUrl = formData.preview
+        ? await ModelService.uploadFile(formData.preview)
+        : null;
 
-      const modelData = { file_url: fileUrl ?? "" };
+      const payload = {
+        file_url: fileUrl,
+        layout_url: layoutUrl,
+        preview_url: previewUrl,
+      };
 
-      modelSchema.parse(modelData);
+      modelSchema.parse(payload);
 
-      await ModelService.createModel(modelData.file_url);
+      await ModelService.createModel(payload);
+
       this.showNotification("Model berhasil ditambahkan!");
       this.loadModels();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.issues.forEach((err) => {
-          this.showNotification(err.message, "error");
-        });
+        error.issues.forEach((err) =>
+          this.showNotification(err.message, "error")
+        );
         return;
       }
-
-      this.showNotification("Gagal menyimpan model. Silakan coba lagi.", "error");
+      console.error(error);
+      this.showNotification(
+        "Gagal menyimpan model. Silakan coba lagi.",
+        "error"
+      );
     } finally {
       this.setState({ submitting: false });
     }
   };
 
   handleDelete = async (id) => {
+    this.setState({ deletingId: id });
     try {
       await ModelService.deleteModel(id);
       this.showNotification("Model berhasil dihapus");
@@ -97,9 +125,10 @@ class ModelDashboard extends React.Component {
     } catch (error) {
       console.error("Error deleting model:", error);
       this.showNotification("Gagal menghapus model", "error");
+    } finally {
+      this.setState({ deletingId: null });
     }
   };
-
 
   openEditModal = (model) => {
     this.setState({
@@ -116,35 +145,51 @@ class ModelDashboard extends React.Component {
   handleEditSave = async (id, updateData) => {
     this.setState({ editing: true });
     try {
-      let fileUrl = null;
-      if (updateData.newFile) {
-        fileUrl = await ModelService.uploadFile(updateData.newFile);
-      }
+      let fileUrl = updateData.file
+        ? await ModelService.uploadFile(updateData.file)
+        : null;
+      let layoutUrl = updateData.layout
+        ? await ModelService.uploadFile(updateData.layout)
+        : null;
+      let previewUrl = updateData.preview
+        ? await ModelService.uploadFile(updateData.preview)
+        : null;
 
       const payload = {
         ...(fileUrl && { file_url: fileUrl }),
+        ...(layoutUrl && { layout_url: layoutUrl }),
+        ...(previewUrl && { preview_url: previewUrl }),
       };
 
       editModelSchema.parse(payload);
 
+      if (Object.keys(payload).length === 0) {
+        console.warn("Tidak ada data yang berubah, skip update");
+        this.setState({ editing: false });
+        return;
+      }
+
       await ModelService.updateModel(id, payload);
+
       this.showNotification("Model berhasil diperbarui!");
       this.closeEditModal();
       this.loadModels();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.issues.forEach((err) => {
-          this.showNotification(err.message, "error");
-        });
+        error.issues.forEach((err) =>
+          this.showNotification(err.message, "error")
+        );
         return;
       }
-
-      this.showNotification("Gagal memperbarui model. Silakan coba lagi.", "error");
+      console.error("Update gagal:", error);
+      this.showNotification(
+        "Gagal memperbarui model. Silakan coba lagi.",
+        "error"
+      );
     } finally {
       this.setState({ editing: false });
     }
   };
-
 
   openConfirmModal = (id) => {
     this.setState({
@@ -191,7 +236,8 @@ class ModelDashboard extends React.Component {
                 className="text-4xl font-bold text-white mb-4 text-center mx-auto"
               />
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Kelola file model (.obj) Anda dengan mudah. Tambahkan dan hapus model sesuai kebutuhan.
+                Kelola file model (.obj) Anda dengan mudah. Tambahkan dan hapus
+                model sesuai kebutuhan.
               </p>
             </div>
 
@@ -207,18 +253,17 @@ class ModelDashboard extends React.Component {
                 </p>
               </div>
 
-              
               <DataGrid
                 items={models}
                 onDelete={this.openConfirmModal}
                 onEdit={this.openEditModal}
                 loading={loading}
+                deletingId={this.state.deletingId}
               />
             </div>
           </div>
         </main>
 
-        
         <EditModelModal
           isOpen={editModal.isOpen}
           model={editModal.model}
@@ -226,7 +271,6 @@ class ModelDashboard extends React.Component {
           onSave={this.handleEditSave}
           loading={editing}
         />
-        
 
         <ConfirmModal
           isOpen={confirmModal.isOpen}

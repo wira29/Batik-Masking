@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="bg-black text-white py-12 mt-10 border-t border-t-slate-600/[0.5]">
+    <footer className="bg-black text-white py-12 mt-10 border-t border-t-slate-600/[0.5] px-5">
       <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
         <div className="space-y-4 text-center md:text-left">
           <h3 className="text-lg font-semibold">Batik Nusantara</h3>

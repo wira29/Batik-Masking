@@ -1,10 +1,11 @@
-import { Trash2, Eye, Pencil, Cube, CuboidIcon } from "lucide-react";
+import { Trash2, Eye, Pencil, CuboidIcon } from "lucide-react";
 
 const DataGrid = ({
   items = [],
   onEdit,
   onDelete,
   loading = false,
+  deletingId,
   titleKey = "title",
   descriptionKey = "description",
   imageKey = "image_url",
@@ -58,7 +59,7 @@ const DataGrid = ({
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {items.map((item) => {
-          const isObjFile = item['file_url']?.endsWith(".obj");
+          const isObjFile = item["file_url"]?.endsWith(".obj");
 
           return (
             <div
@@ -68,7 +69,11 @@ const DataGrid = ({
               <div className="relative w-full h-48 bg-black overflow-hidden">
                 {isObjFile ? (
                   <div className="w-full h-full flex items-center justify-center">
-                    <CuboidIcon className="w-28 h-28 text-purple-800" />
+                    {!item.preview_url ? (
+                      <CuboidIcon className="w-28 h-28 text-purple-800" />
+                    ) : (
+                      <img src={item.preview_url} alt="Model" loading="lazy" />
+                    )}
                   </div>
                 ) : item[imageKey] ? (
                   <img
@@ -94,9 +99,37 @@ const DataGrid = ({
                   {onDelete && (
                     <button
                       onClick={() => onDelete(item.id, item[titleKey])}
-                      className="flex items-center space-x-2 p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      disabled={deletingId === item.id}
+                      className={`flex items-center space-x-2 p-3 rounded-lg transition-colors ${
+                        deletingId === item.id
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-red-600 hover:bg-red-700 text-white"
+                      }`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {deletingId === item.id ? (
+                        <svg
+                          className="animate-spin h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          />
+                        </svg>
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
                     </button>
                   )}
                 </div>
@@ -107,7 +140,6 @@ const DataGrid = ({
                   {item[titleKey]}
                 </h3>
 
-                {/* Kalau bukan .obj, baru render deskripsi */}
                 {!isObjFile && (
                   <p className="text-gray-400 text-sm line-clamp-2">
                     <span

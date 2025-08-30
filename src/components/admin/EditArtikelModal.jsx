@@ -14,7 +14,6 @@ const EditArtikelModal = ({ isOpen, onClose, artikel, onSave, loading }) => {
     currentImageUrl: "",
   });
 
-  // Hanya set form saat modal pertama kali dibuka atau artikel berubah
   useEffect(() => {
     if (artikel && isOpen) {
       setForm({

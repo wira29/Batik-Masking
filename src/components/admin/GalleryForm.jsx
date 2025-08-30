@@ -26,6 +26,8 @@ const GalleryForm = ({ onSubmit, loading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSubmit(form);
+    console.log(form);
+    
     setForm({ title: "", description: "", image: null });
   };
 

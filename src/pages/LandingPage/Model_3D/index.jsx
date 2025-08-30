@@ -15,6 +15,8 @@ import MotifModal from "./components/MotifModal";
 import ShirtObj from "./components/ShirtObj";
 import SideToolbar from "./components/SideToolbar";
 import URLImage from "./components/URLImage";
+import LoadingScreen from "../../../components/LoadingScreen";
+import LoadingOverlay from "../../../components/LoadingOverlay";
 
 export default function Home() {
   const stageRef = useRef();
@@ -25,6 +27,7 @@ export default function Home() {
   const [openMotif, setOpenMotif] = useState(false);
   const [openCrop, setOpenCrop] = useState(false);
   const [cropImageData, setCropImageData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [selectedModel, setSelectedModel] = useState({
     model: "/model/uv-kemeja-upgrade.obj",
@@ -69,11 +72,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const handleWheel = (e) => {
-    };
+    const handleWheel = (e) => {};
 
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    return () => window.removeEventListener('wheel', handleWheel);
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    return () => window.removeEventListener("wheel", handleWheel);
   }, []);
 
   const applyTexture = () => {
@@ -83,6 +85,7 @@ export default function Home() {
   };
 
   const selectModel = (model, layout) => {
+    setLoading(true);
     setOpenModel(false);
     setSelectedModel({ model, layout });
   };
@@ -132,8 +135,14 @@ export default function Home() {
     "/batik/batik-4.jpg",
   ];
 
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, [selectedModel]);
+
   return (
     <>
+      <LoadingScreen />
       <div className="w-max-[100vw] h-screen overflow-hidden flex justify-center items-center bg-black p-5 lg:hidden">
         <div className="border-white border-dashed border h-1/2 rounded-xl justify-center items-center flex p-10">
           <h1 className="text-center text-4xl font-bold text-white">
@@ -144,17 +153,21 @@ export default function Home() {
 
       <div className="flex-row h-full w-max-[100vw] overflow-x-hidden relative bg-black hidden lg:flex">
         <div className="flex-4">
-          <Canvas camera={{ position: [0, 1, 3] }}>
-            <ambientLight intensity={1} />
-            <directionalLight position={[5, 5, 5]} intensity={1.5} />
-            <OrbitControls />
-            <Center disableY={false}>
-              <ShirtObj
-                textureUrl={stageTexture}
-                pathModel={selectedModel.model}
-              />
-            </Center>
-          </Canvas>
+          {loading ? (
+            <LoadingOverlay show={loading} />
+          ) : (
+            <Canvas camera={{ position: [0, 1, 3] }}>
+              <ambientLight intensity={1} />
+              <directionalLight position={[5, 5, 5]} intensity={1.5} />
+              <OrbitControls />
+              <Center disableY={false}>
+                <ShirtObj
+                  textureUrl={stageTexture}
+                  pathModel={selectedModel.model}
+                />
+              </Center>
+            </Canvas>
+          )}
         </div>
 
         <div className="flex-3 h-screen bg-black border-l border-white/[0.5] overflow-hidden">
@@ -233,22 +246,24 @@ export default function Home() {
               </Stage>
             </div>
           </div>
-
-          <SideToolbar
-            applyTexture={applyTexture}
-            setOpenModel={setOpenModel}
-            setOpenMotif={setOpenMotif}
-          />
-
-          <div className="absolute z-50 left-5 bottom-5">
-            <Link
-              to={"/tutorial"}
-              title="Tutorials"
-              className="btn-info mt-5 p-3 bg-amber-700 hover:bg-amber-800 text-white rounded-lg block"
-            >
-              <Info />
-            </Link>
-          </div>
+          {!loading && (
+            <>
+              <SideToolbar
+                applyTexture={applyTexture}
+                setOpenModel={setOpenModel}
+                setOpenMotif={setOpenMotif}
+              />
+              <div className="absolute z-50 left-5 bottom-5">
+                <Link
+                  to={"/tutorial"}
+                  title="Tutorials"
+                  className="btn-info mt-5 p-3 bg-amber-700 hover:bg-amber-800 text-white rounded-lg block"
+                >
+                  <Info />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
 
         {openModel && (

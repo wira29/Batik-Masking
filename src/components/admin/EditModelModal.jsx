@@ -1,4 +1,4 @@
-import { CuboidIcon, ImageIcon, Loader2, Save, X } from "lucide-react";
+import { CuboidIcon, Loader2, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import DragDropUpload from "./DragDropUpload";
 
@@ -36,11 +36,10 @@ const EditModelModal = ({ isOpen, onClose, model, onSave, loading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // hanya kirim yang ada file baru
     const updateData = {};
-    if (form.file) updateData.file_url = form.file;
-    if (form.layout) updateData.layout_url = form.layout;
-    if (form.preview) updateData.preview_url = form.preview;
+    if (form.file) updateData.file = form.file;
+    if (form.layout) updateData.layout = form.layout;
+    if (form.preview) updateData.preview = form.preview;
 
     await onSave(model.id, updateData);
   };
@@ -55,6 +54,7 @@ const EditModelModal = ({ isOpen, onClose, model, onSave, loading }) => {
       ></div>
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative bg-black rounded-xl border border-gray-500/[0.5] shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          {/* Header */}
           <div className="sticky top-0 bg-black border-b border-gray-500/[0.5] px-6 py-4 flex items-center justify-between z-50">
             <h2 className="text-xl font-bold text-white">Edit Model</h2>
             <button
@@ -77,12 +77,23 @@ const EditModelModal = ({ isOpen, onClose, model, onSave, loading }) => {
                 accept=".obj,model/*"
                 maxFileSizeMB={5}
               />
-              {form.currentFileUrl && (
-                <p className="text-xs text-gray-500 mt-2">
-                  * File saat ini: <code>.obj</code>. Biarkan kosong jika tidak ingin mengubah.
-                </p>
+              {form.currentFileUrl && !form.file && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Model Saat Ini
+                  </label>
+                  <div className="relative w-full h-48 bg-black border border-gray-300/[0.5] rounded-lg flex items-center justify-center">
+                    <CuboidIcon className="w-32 h-32 text-purple-700" />
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                      <span className="text-white text-sm bg-black bg-opacity-60 px-3 py-1 rounded">
+                        File OBJ saat ini
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 {form.currentLayoutUrl ? "Ganti Layout (.png)" : "Upload Layout"}
@@ -94,10 +105,24 @@ const EditModelModal = ({ isOpen, onClose, model, onSave, loading }) => {
                 accept="image/png,image/*"
                 maxFileSizeMB={5}
               />
-              {form.currentLayoutUrl && (
-                <p className="text-xs text-gray-500 mt-2">
-                  * Ada file layout. Kosongkan jika tidak ingin mengubah.
-                </p>
+              {form.currentLayoutUrl && !form.layout && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Layout Saat Ini
+                  </label>
+                  <div className="relative w-full h-48 bg-black border border-gray-300/[0.5] rounded-lg overflow-hidden">
+                    <img
+                      src={form.currentLayoutUrl}
+                      alt="Current Layout"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                      <span className="text-white text-sm bg-black bg-opacity-60 px-3 py-1 rounded">
+                        Layout saat ini
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -112,10 +137,24 @@ const EditModelModal = ({ isOpen, onClose, model, onSave, loading }) => {
                 accept="image/png,image/*"
                 maxFileSizeMB={5}
               />
-              {form.currentPreviewUrl && (
-                <p className="text-xs text-gray-500 mt-2">
-                  * Ada file preview. Kosongkan jika tidak ingin mengubah.
-                </p>
+              {form.currentPreviewUrl && !form.preview && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Preview Saat Ini
+                  </label>
+                  <div className="relative w-full h-48 bg-black border border-gray-300/[0.5] rounded-lg overflow-hidden">
+                    <img
+                      src={form.currentPreviewUrl}
+                      alt="Current Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                      <span className="text-white text-sm bg-black bg-opacity-60 px-3 py-1 rounded">
+                        Preview saat ini
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 

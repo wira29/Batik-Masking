@@ -1,10 +1,6 @@
 import { supabase } from "../supabaseClient";
 
 class ArticleService {
-  /**
-   * Fetch all articles ordered by latest
-   * @returns {Promise<Array>} Array of article objects
-   */
   async getArticles() {
     try {
       const { data, error } = await supabase
@@ -20,11 +16,6 @@ class ArticleService {
     }
   }
 
-  /**
-   * Upload image to Supabase storage
-   * @param {File} file - Image file to upload
-   * @returns {Promise<string>} Public URL of uploaded image
-   */
   async uploadImage(file) {
     try {
       const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
@@ -49,11 +40,6 @@ class ArticleService {
     }
   }
 
-  /**
-   * Create new article
-   * @param {Object} articleData - Article data object
-   * @returns {Promise<Object>} Created article object
-   */
   async createArticle(articleData) {
     try {
       const { data, error } = await supabase
@@ -70,18 +56,32 @@ class ArticleService {
     }
   }
 
-  /**
-   * Delete article by ID
-   * @param {number} id - Article ID to delete
-   * @returns {Promise<void>}
-   */
+  async deleteFileFromUrl(fileUrl) {
+    if (!fileUrl) return;
+    try {
+      const path = fileUrl.split(`/storage/v1/object/public/article-images/`)[1];
+      if (!path) return;
+      await supabase.storage.from("article-images").remove([path]);
+    } catch (err) {
+      console.warn("Error deleting old file:", err.message);
+    }
+  }
+
   async deleteArticle(id) {
     try {
+      const { data: article, error: fetchErr } = await supabase
+        .from("articles")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (fetchErr) throw fetchErr;
+
+      await this.deleteFileFromUrl(article?.image_url);
+
       const { error } = await supabase
         .from("articles")
         .delete()
         .eq("id", id);
-
       if (error) throw error;
     } catch (error) {
       console.error("Error deleting article:", error);
@@ -89,21 +89,26 @@ class ArticleService {
     }
   }
 
-  /**
-   * Update article by ID
-   * @param {number} id - Article ID to update
-   * @param {Object} updateData - Data to update
-   * @returns {Promise<Object>} Updated article object
-   */
   async updateArticle(id, updateData) {
     try {
+      const { data: oldArticle, error: fetchErr } = await supabase
+        .from("articles")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (fetchErr) throw fetchErr;
+
+      if (updateData.image instanceof File) {
+        updateData.image_url = await this.uploadImage(updateData.image);
+        await this.deleteFileFromUrl(oldArticle.image_url);
+      }
+
       const { data, error } = await supabase
         .from("articles")
         .update(updateData)
         .eq("id", id)
         .select()
         .single();
-
       if (error) throw error;
       return data;
     } catch (error) {

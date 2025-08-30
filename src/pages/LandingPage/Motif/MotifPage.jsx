@@ -34,11 +34,9 @@ const MotifPage = () => {
   }, []);
 
   if (loading) return <LoadingGrid />;
-  if (error)
-    return <p className="text-center text-red-500 mt-16">Error: {error}</p>;
 
   return (
-    <section className="min-h-screen bg-black text-white py-16">
+    <section className="min-h-screen bg-black text-white py-16 px-5">
       <div className="mx-auto">
         <h1 className="text-4xl md:text-6xl font-bold text-center mb-12">
           Motif Batik Nusantara

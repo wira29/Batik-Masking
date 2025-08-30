@@ -31,10 +31,10 @@ const BlogPage = () => {
   }
 
   return (
-    <section className="min-h-screen bg-black text-white py-10">
+    <section className="min-h-screen bg-black text-white py-10 px-5">
       <div className="py-10">
         <BlurText delay={100} text="Artikel" className="text-5xl font-bold"/>
-        <p className="mt-3 text-sm max-w-xl">
+        <p className="mt-3 lg:text-xl md:text-md max-w-xl">
           Temukan kumpulan artikel terbaru seputar tips, inspirasi, dan berita
           menarik dari kami.
         </p>
