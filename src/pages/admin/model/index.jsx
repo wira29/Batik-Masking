@@ -2,11 +2,11 @@ import React from "react";
 import z from "zod";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
 import DataGrid from "../../../components/admin/DataGrid";
+import EditModelModal from "../../../components/admin/EditModelModal";
+import ModelForm from "../../../components/admin/ModelForm";
 import Notification from "../../../components/Notification";
 import BlurText from "../../../components/react-bits/BlurText/BlurText";
 import ModelService from "../../../services/ModelService";
-import EditModelModal from "../../../components/admin/EditModelModal";
-import ModelForm from "../../../components/admin/ModelForm";
 
 const modelSchema = z.object({
   file_url: z.string().min(1, { message: "File OBJ wajib diupload" }),
@@ -79,13 +79,13 @@ class ModelDashboard extends React.Component {
     try {
       const fileUrl = formData.file
         ? await ModelService.uploadFile(formData.file)
-        : null;
+        : "";
       const layoutUrl = formData.layout
         ? await ModelService.uploadFile(formData.layout)
-        : null;
+        : "";
       const previewUrl = formData.preview
         ? await ModelService.uploadFile(formData.preview)
-        : null;
+        : "";
 
       const payload = {
         file_url: fileUrl,

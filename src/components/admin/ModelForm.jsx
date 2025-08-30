@@ -12,8 +12,8 @@ const ModelForm = ({ onSubmit, loading }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.file || !form.layout || !form.preview)
-      return alert("Semua file wajib diupload!");
+    // if (!form.file || !form.layout || !form.preview)
+    //   return alert("Semua file wajib diupload!");
     try {
       await onSubmit({
         file: form.file,

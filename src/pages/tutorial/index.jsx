@@ -1,10 +1,9 @@
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import BlurText from "../../components/react-bits/BlurText/BlurText";
+import { ArrowLeft } from "lucide-react";
 import Footer from "../../components/Footer";
+import BlurText from "../../components/react-bits/BlurText/BlurText";
 
-export const Index = () => {
+const Tutorial = () => {
   const steps = [
     {
       title: "1. Masuk ke Halaman 3D",
@@ -36,11 +35,11 @@ export const Index = () => {
       desc: "Drag (geser) motif batik ke sisi pakaian yang kamu inginkan. Misalnya, letakkan motif di sisi depan pakaian atau hanya di lengan. Kamu juga bisa memperbesar atau memperkecil ukuran motif (resize) dengan ikon panah merah, serta memutarnya (rotate) dengan ikon panah kuning sesuai kreativitasmu.",
       img: "/steps/step-5.png",
     },
-   {
-  title: "7. Crop Motif Batik",
-  desc: "Jika ingin mengambil bagian tertentu dari motif batik, gunakan fitur crop. Double-click (klik 2x) pada motif, atau tekan tombol 'C' di keyboard untuk membuka modal crop. Di dalam modal, gunakan kotak putih untuk memilih area motif: drag untuk memindahkan posisi kotak, atau tarik sudutnya untuk mengubah ukuran crop. Setelah sesuai, klik 'Apply Crop' untuk menerapkan, atau 'Reset' untuk mengulang.",
-  img: "/steps/step-8.png",
-},
+    {
+      title: "7. Crop Motif Batik",
+      desc: "Jika ingin mengambil bagian tertentu dari motif batik, gunakan fitur crop. Double-click (klik 2x) pada motif, atau tekan tombol 'C' di keyboard untuk membuka modal crop. Di dalam modal, gunakan kotak putih untuk memilih area motif: drag untuk memindahkan posisi kotak, atau tarik sudutnya untuk mengubah ukuran crop. Setelah sesuai, klik 'Apply Crop' untuk menerapkan, atau 'Reset' untuk mengulang.",
+      img: "/steps/step-8.png",
+    },
     {
       title: "8. Terapkan Motif ke Model 3D",
       desc: "Jika kamu sudah puas dengan penempatan motif, klik tombol checklist. Sistem akan menerapkan motif yang ada di container ke model 3D secara otomatis, sehingga pakaian 3D akan memiliki corak batik sesuai aturannya.",
@@ -121,3 +120,5 @@ export const Index = () => {
     </div>
   );
 };
+
+export default Tutorial;
