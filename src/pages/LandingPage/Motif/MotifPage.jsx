@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import LoadingGrid from "../../../components/LoadingGrid";
 import MotifService from "../../../services/MotifService";
+import { getImage } from "../../../utils/imageHelper";
 
 const MotifPage = () => {
   const [motifs, setMotifs] = useState([]);
@@ -13,7 +14,6 @@ const MotifPage = () => {
         setLoading(true);
         const dataFromDB = await MotifService.getMotifs();
 
-        // gabungkan DB + JSON
         const combinedData = [
           ...dataFromDB,
           // ...Motifs.map((item, index) => ({
@@ -34,11 +34,9 @@ const MotifPage = () => {
   }, []);
 
   if (loading) return <LoadingGrid />;
-  if (error)
-    return <p className="text-center text-red-500 mt-16">Error: {error}</p>;
 
   return (
-    <section className="min-h-screen bg-black text-white py-16">
+    <section className="min-h-screen bg-black text-white py-16 px-5">
       <div className="mx-auto">
         <h1 className="text-4xl md:text-6xl font-bold text-center mb-12">
           Motif Batik Nusantara
@@ -51,7 +49,7 @@ const MotifPage = () => {
               className="bg-zinc-900 rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform duration-300"
             >
               <img
-                src={motif.image_url}
+                src={getImage(motif.image_url)}
                 alt={motif.title}
                 className="w-full h-56 object-cover"
               />

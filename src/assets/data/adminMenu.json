@@ -1,0 +1,26 @@
+[
+  {
+    "id": 2,
+    "label": "Motif Batik",
+    "path": "/admin/motif-batik",
+    "icon": "Palette"
+  },
+  {
+    "id": 3,
+    "label": "Model",
+    "path": "/admin/models",
+    "icon": "User"
+  },
+  {
+    "id": 4,
+    "label": "Artikel",
+    "path": "/admin/artikel",
+    "icon": "FileText"
+  },
+  {
+    "id": 5,
+    "label": "Gallery",
+    "path": "/admin/gallery",
+    "icon": "Image"
+  }
+]

@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import LoadingGrid from "../../../../components/LoadingGrid";
 import MotifService from "../../../../services/MotifService";
+import { getImage } from "../../../../utils/imageHelper";
 
 export default function MotifModal({
   setOpenMotif,
@@ -74,7 +75,7 @@ export default function MotifModal({
                 onClick={() => handleImageClick(motif)}
               >
                 <img
-                  src={motif.image_url}
+                  src={getImage(motif.image_url)}
                   alt={motif.title || "Motif"}
                   className="h-full w-full object-cover"
                 />

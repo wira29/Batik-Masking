@@ -1,36 +1,38 @@
-import { Loader2, Save, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import DragDropUpload from './DragDropUpload';
+import { Loader2, Save, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import DragDropUpload from "./DragDropUpload";
+import TextInput from "../TextInput";
+import TextareaInput from "../TextareaInput";
 
-const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
+const EditGalleryModal = ({ isOpen, onClose, gallery, onSave, loading }) => {
   const [form, setForm] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     image: null,
-    currentImageUrl: ''
+    currentImageUrl: "",
   });
 
   useEffect(() => {
-    if (motif) {
+    if (gallery && isOpen) {
       setForm({
-        title: motif.title || '',
-        description: motif.description || '',
+        title: gallery.title || "",
+        description: gallery.description || "",
         image: null,
-        currentImageUrl: motif.image_url || ''
+        currentImageUrl: gallery.image_url || "",
       });
     }
-  }, [motif]);
+  }, [gallery, isOpen]);
 
   const handleInputChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleFileSelect = (file) => {
-    setForm(prev => ({ ...prev, image: file }));
+    setForm((prev) => ({ ...prev, image: file }));
   };
 
   const handleRemoveFile = () => {
-    setForm(prev => ({ ...prev, image: null }));
+    setForm((prev) => ({ ...prev, image: null }));
   };
 
   const handleSubmit = async (e) => {
@@ -38,23 +40,26 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
     const updateData = {
       title: form.title,
       description: form.description,
-      newImage: form.image
+      image_url: form.image,
     };
-
-    await onSave(motif.id, updateData);
+    await onSave(gallery.id, updateData);
   };
 
-  // const isFormValid = form.title.trim() && form.description.trim();
-
-  if (!isOpen || !motif) return null;
+  if (!isOpen || !gallery) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onClick={onClose}></div>
+      <div
+        className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+        onClick={onClose}
+      ></div>
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative bg-black rounded-xl border border-gray-500/[0.5] shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Header */}
           <div className="sticky top-0 bg-black border-b border-gray-500/[0.5] px-6 py-4 flex items-center justify-between z-50">
-            <h2 className="text-xl font-bold text-white">Edit Motif</h2>
+            <h2 className="text-xl font-bold text-white">
+              Edit Gallery | {form.title}
+            </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-300 transition-colors"
@@ -63,35 +68,25 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
             </button>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Judul Motif <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Masukkan nama motif (harus unik)"
-                value={form.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            <TextInput
+              label="Judul"
+              value={form.title}
+              onChange={(val) => handleInputChange("title", val)}
+              placeholder="Masukkan judul gallery"
+              required
+            />
 
-              />
-            </div>
+            <TextareaInput
+              label="Deskripsi"
+              value={form.description}
+              onChange={(val) => handleInputChange("description", val)}
+              placeholder="Masukkan deskripsi gallery"
+              required
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Deskripsi <span className="text-red-400">*</span>
-              </label>
-              <textarea
-                placeholder="Ceritakan tentang motif ini, sejarah, filosofi, atau makna khususnya..."
-                value={form.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={4}
-                className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-
-              />
-            </div>
-
+            {/* Current Image */}
             {form.currentImageUrl && !form.image && (
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -100,7 +95,7 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
                 <div className="relative w-full h-48 bg-gray-800 rounded-lg overflow-hidden">
                   <img
                     src={form.currentImageUrl}
-                    alt="Current motif"
+                    alt="Current gallery"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
@@ -112,9 +107,12 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
               </div>
             )}
 
+            {/* Upload New Image */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                {form.currentImageUrl ? 'Ganti Gambar (opsional)' : 'Upload Gambar'}
+                {form.currentImageUrl
+                  ? "Ganti Gambar (opsional)"
+                  : "Upload Gambar"}
               </label>
               <DragDropUpload
                 onFileSelect={handleFileSelect}
@@ -128,6 +126,7 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
               )}
             </div>
 
+            {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
               <button
                 type="button"
@@ -161,4 +160,4 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
   );
 };
 
-export default EditMotifModal;
+export default EditGalleryModal;

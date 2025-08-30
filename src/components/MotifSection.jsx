@@ -1,35 +1,28 @@
+import { useEffect, useState } from "react";
 import { TreePalmIcon } from "lucide-react";
 import BlurText from "./react-bits/BlurText/BlurText";
 import HorizontalCardRunner from "./HorizontalCardRunner";
+import MotifService from "../services/MotifService";
+import LoadingGrid from "./LoadingGrid";
 
 const MotifSection = () => {
-  const items = [
-    {
-      title: "Batik Parang",
-      desc: "Motif klasik yang melambangkan kesinambungan, keteguhan, dan semangat tak terputus.",
-      img: "/batik/batik-1.jpg",
-    },
-    {
-      title: "Batik Kawung",
-      desc: "Terinspirasi buah aren/kolang-kaling; bermakna kesucian, keadilan, dan kebijaksanaan.",
-      img: "/batik/batik-2.jpg",
-    },
-    {
-      title: "Mega Mendung",
-      desc: "Awan berlapis khas Cirebon; melambangkan kesabaran dan ketenangan batin.",
-      img: "/batik/batik-3.jpg",
-    },
-    {
-      title: "Batik Tujuh Rupa",
-      desc: "Pekalongan yang kaya warna dan ragam bentuk flora-fauna pesisiran.",
-      img: "/sejarah-batik/sejarah-batik-1.jpg",
-    },
-    {
-      title: "Batik Tujuh Rupa",
-      desc: "Pekalongan yang kaya warna dan ragam bentuk flora-fauna pesisiran.",
-      img: "/sejarah-batik/sejarah-batik-2.jpg",
-    },
-  ];
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMotifs = async () => {
+      try {
+        const data = await MotifService.getMotifs();
+        setItems(data);
+      } catch (error) {
+        console.error("Gagal memuat data motif:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMotifs();
+  }, []);
 
   return (
     <section className="text-white py-16 md:py-24 bg-black">
@@ -44,12 +37,11 @@ const MotifSection = () => {
             className="text-3xl md:text-5xl font-bold"
           />
         </div>
-
-        <HorizontalCardRunner 
-          items={items} 
-          autoPlay={true} 
-          interval={2000} 
-        />
+        {loading ? (
+          <LoadingGrid />
+        ) : (
+          <HorizontalCardRunner items={items} autoPlay={true} interval={2000} />
+        )}
       </div>
     </section>
   );

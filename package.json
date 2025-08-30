@@ -21,6 +21,7 @@
     "gsap": "^3.13.0",
     "konva": "^9.3.22",
     "lucide-react": "^0.542.0",
+    "quill": "^2.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-konva": "^19.0.7",
@@ -30,7 +31,8 @@
     "tailwindcss": "^4.1.7",
     "three": "^0.176.0",
     "use-image": "^1.1.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zod": "^4.1.4"
   },
   "scripts": {
     "start": "react-scripts start",

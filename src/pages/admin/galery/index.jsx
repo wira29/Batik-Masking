@@ -1,55 +1,64 @@
 import React from "react";
 import z from "zod";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
-import EditMotifModal from "../../../components/admin/EditMotifModal";
-import MotifForm from "../../../components/admin/MotifForm";
+import EditGalleryModal from "../../../components/admin/EditGalleryModal";
+import GalleryForm from "../../../components/admin/GalleryForm";
 import Notification from "../../../components/Notification";
 import BlurText from "../../../components/react-bits/BlurText/BlurText";
-import MotifService from "../../../services/MotifService";
+import GalleryService from "../../../services/GalleryService";
 import DataGrid from "../../../components/admin/DataGrid";
 
-const motifSchema = z.object({
+const gallerySchema = z.object({
   title: z.string().min(1, { message: "Nama wajib diisi" }),
   description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
   image_url: z.string().min(1, { message: "Gambar wajib diisi" }),
 });
 
-const editMotifSchema = z.object({
+const editGallerySchema = z.object({
   title: z.string().min(1, { message: "Nama wajib diisi" }),
   description: z.string().min(1, { message: "Deskripsi wajib diisi" }),
-  image_url: z.string().min(1, { message: "Image is required" }).optional(),
+  image_url: z.string().min(1, { message: "Gambar wajib diisi" }).optional(),
 });
 
-class MotifDashboard extends React.Component {
+class GalleryDashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      motifs: [],
+      gallery: [],
       loading: false,
       submitting: false,
       editing: false,
       notification: null,
-      editModal: { isOpen: false, motif: null },
-      confirmModal: { isOpen: false, motif: null },
+      editModal: {
+        isOpen: false,
+        gallery: null,
+      },
+      confirmModal: {
+        isOpen: false,
+        gallery: null,
+      },
     };
   }
 
   componentDidMount() {
-    this.loadMotifs();
+    this.loadGallery();
   }
 
   showNotification = (message, type = "success") => {
     this.setState({ notification: { message, type } });
-    setTimeout(() => this.setState({ notification: null }), 5000);
+    setTimeout(() => {
+      this.setState({ notification: null });
+    }, 5000);
   };
 
-  loadMotifs = async () => {
+  loadGallery = async () => {
     this.setState({ loading: true });
     try {
-      const motifs = await MotifService.getMotifs();
-      this.setState({ motifs });
+      const gallery = await GalleryService.getGallery();
+      this.setState({ gallery });
     } catch (error) {
-      this.showNotification("Gagal memuat data motif", "error");
+      console.error("Error loading gallery:", error);
+      this.showNotification("Gagal memuat data gallery", "error");
     } finally {
       this.setState({ loading: false });
     }
@@ -57,32 +66,36 @@ class MotifDashboard extends React.Component {
 
   handleSubmit = async (formData) => {
     this.setState({ submitting: true });
+    
     try {
       let imageUrl = null;
-      if (formData.image)
-        imageUrl = await MotifService.uploadImage(formData.image);
+      if (formData.image) {
+        imageUrl = await GalleryService.uploadImage(formData.image);
+      }
 
-      const motifData = {
+      const galleryData = {
         title: formData.title,
         description: formData.description,
-        image_url: imageUrl ?? "",
+        image_url: imageUrl,
       };
-      motifSchema.parse(motifData);
 
-      await MotifService.createMotif(motifData);
-      this.showNotification("Motif berhasil ditambahkan!");
-      this.loadMotifs();
+      gallerySchema.parse(galleryData);
+
+      await GalleryService.createGalleryItem(galleryData);
+      this.showNotification("Gallery berhasil ditambahkan!");
+      this.loadGallery();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.issues.forEach((err) =>
-          this.showNotification(err.message, "error")
-        );
+        error.issues.forEach((err) => {
+          this.showNotification(err.message, "error");
+        });
         return;
       }
+
       this.showNotification(
         error.message.includes("duplicate")
-          ? "Judul motif sudah ada, gunakan judul yang berbeda"
-          : "Gagal menyimpan motif. Silakan coba lagi.",
+          ? "Judul gallery sudah ada, gunakan judul yang berbeda"
+          : "Gagal menyimpan gallery. Silakan coba lagi.",
         "error"
       );
     } finally {
@@ -92,57 +105,79 @@ class MotifDashboard extends React.Component {
 
   handleDelete = async (id) => {
     try {
-      await MotifService.deleteMotif(id);
-      this.showNotification("Motif berhasil dihapus");
-      this.loadMotifs();
-    } catch {
-      this.showNotification("Gagal menghapus motif", "error");
+      await GalleryService.deleteGalleryItem(id);
+      this.showNotification("Gallery berhasil dihapus");
+      this.loadGallery();
+    } catch (error) {
+      console.error("Error deleting gallery:", error);
+      this.showNotification("Gagal menghapus gallery", "error");
     }
   };
 
-  openEditModal = (motif) =>
-    this.setState({ editModal: { isOpen: true, motif } });
-  closeEditModal = () =>
-    this.setState({ editModal: { isOpen: false, motif: null } });
-  openConfirmModal = (id, title) =>
-    this.setState({ confirmModal: { isOpen: true, motif: { id, title } } });
-  closeConfirmModal = () =>
-    this.setState({ confirmModal: { isOpen: false, motif: null } });
+  openEditModal = (gallery) => {
+    this.setState({
+      editModal: { isOpen: true, gallery },
+    });
+  };
+
+  closeEditModal = () => {
+    this.setState({
+      editModal: { isOpen: false, gallery: null },
+    });
+  };
+
+  openConfirmModal = (id, title) => {
+    this.setState({
+      confirmModal: { isOpen: true, gallery: { id, title } },
+    });
+  };
+
+  closeConfirmModal = () => {
+    this.setState({
+      confirmModal: { isOpen: false, gallery: null },
+    });
+  };
 
   handleConfirmDelete = () => {
     const { confirmModal } = this.state;
-    if (confirmModal.motif) this.handleDelete(confirmModal.motif.id);
+    if (confirmModal.gallery) {
+      this.handleDelete(confirmModal.gallery.id);
+    }
   };
 
   handleEditSave = async (id, updateData) => {
     this.setState({ editing: true });
+    
     try {
       let imageUrl = null;
-      if (updateData.newImage)
-        imageUrl = await MotifService.uploadImage(updateData.newImage);
+      if (updateData.image_url) {
+        imageUrl = await GalleryService.uploadImage(updateData.image_url);
+      }
 
       const payload = {
         title: updateData.title,
         description: updateData.description,
         ...(imageUrl && { image_url: imageUrl }),
       };
-      editMotifSchema.parse(payload);
 
-      await MotifService.updateMotif(id, payload);
-      this.showNotification("Motif berhasil diperbarui!");
+      editGallerySchema.parse(payload);
+
+      await GalleryService.updateGalleryItem(id, payload);
+      this.showNotification("Gallery berhasil diperbarui!");
       this.closeEditModal();
-      this.loadMotifs();
+      this.loadGallery();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.issues.forEach((err) =>
-          this.showNotification(err.message, "error")
-        );
+        error.issues.forEach((err) => {
+          this.showNotification(err.message, "error");
+        });
         return;
       }
+
       this.showNotification(
         error.message.includes("duplicate")
-          ? "Judul motif sudah ada, gunakan judul yang berbeda"
-          : "Gagal memperbarui motif. Silakan coba lagi.",
+          ? "Judul gallery sudah ada, gunakan judul yang berbeda"
+          : "Gagal memperbarui gallery. Silakan coba lagi.",
         "error"
       );
     } finally {
@@ -152,7 +187,7 @@ class MotifDashboard extends React.Component {
 
   render() {
     const {
-      motifs,
+      gallery,
       loading,
       submitting,
       editing,
@@ -164,35 +199,39 @@ class MotifDashboard extends React.Component {
     return (
       <div className="min-h-screen bg-black">
         <Notification notification={notification} />
+
         <main className="max-w-7xl mx-auto px-6 py-8">
           <div className="space-y-8">
             <div className="text-center flex flex-col gap-2 justify-center">
               <BlurText
-                text="Dashboard Motif Batik"
+                text="Dashboard Gallery"
                 delay={1000}
                 animateBy="words"
                 direction="top"
                 className="text-4xl font-bold text-white mb-4 text-center mx-auto"
               />
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Kelola koleksi motif batik Anda dengan mudah. Tambahkan, edit,
-                dan hapus motif sesuai kebutuhan.
+                Kelola koleksi gallery batik Anda dengan mudah. Tambahkan, edit,
+                dan hapus sesuai kebutuhan.
               </p>
             </div>
+
             <div className="max-w-2xl mx-auto">
-              <MotifForm onSubmit={this.handleSubmit} loading={submitting} />
+              <GalleryForm onSubmit={this.handleSubmit} loading={submitting} />
             </div>
+
             <div>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-white mb-2">
-                  Koleksi Motif
+                  Koleksi Gallery
                 </h2>
                 <p className="text-gray-400">
-                  Semua motif batik yang telah Anda buat
+                  Semua gallery yang telah Anda buat
                 </p>
               </div>
+
               <DataGrid
-                items={motifs}
+                items={gallery}
                 onDelete={this.openConfirmModal}
                 onEdit={this.openEditModal}
                 loading={loading}
@@ -200,19 +239,21 @@ class MotifDashboard extends React.Component {
             </div>
           </div>
         </main>
-        <EditMotifModal
+
+        <EditGalleryModal
           isOpen={editModal.isOpen}
-          motif={editModal.motif}
+          gallery={editModal.gallery}
           onClose={this.closeEditModal}
           onSave={this.handleEditSave}
           loading={editing}
         />
+
         <ConfirmModal
           isOpen={confirmModal.isOpen}
           onClose={this.closeConfirmModal}
           onConfirm={this.handleConfirmDelete}
-          title="Hapus Motif"
-          message={`Apakah Anda yakin ingin menghapus motif "${confirmModal.motif?.title}"? Tindakan ini tidak dapat dibatalkan.`}
+          title="Hapus Gallery"
+          message={`Apakah Anda yakin ingin menghapus gallery "${confirmModal.gallery?.title}"? Tindakan ini tidak dapat dibatalkan.`}
           confirmText="Ya, Hapus"
           cancelText="Batal"
           type="danger"
@@ -222,4 +263,4 @@ class MotifDashboard extends React.Component {
   }
 }
 
-export default MotifDashboard;
+export default GalleryDashboard;

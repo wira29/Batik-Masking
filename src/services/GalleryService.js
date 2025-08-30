@@ -1,28 +1,32 @@
 import { supabase } from "../supabaseClient";
 
-class MotifService {
-  async getMotifs() {
+class GalleryService {
+  async getGallery() {
     const { data, error } = await supabase
-      .from("motifs")
+      .from("gallery")
       .select("*")
       .order("id", { ascending: false });
-
     if (error) throw error;
     return data || [];
   }
 
-  async uploadImage(file, bucket = "motifs") {
-    const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+  async uploadImage(file, bucket = "gallery") {
+    const fileName = `${Date.now()}_${file.name.replace(
+      /[^a-zA-Z0-9.-]/g,
+      "_"
+    )}`;
     const { error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, { cacheControl: "3600", upsert: false });
     if (error) throw error;
 
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(fileName);
     return urlData.publicUrl;
   }
 
-  async deleteFileFromUrl(fileUrl, bucket = "motifs") {
+  async deleteFileFromUrl(fileUrl, bucket = "gallery") {
     if (!fileUrl) return;
 
     const path = fileUrl.split(`/storage/v1/object/public/${bucket}/`)[1];
@@ -33,20 +37,19 @@ class MotifService {
     else console.info("File berhasil dihapus:", path);
   }
 
-  async createMotif({ image, ...data }) {
-    const imageUrl = await this.uploadImage(image);
+  async createGalleryItem({ title, description, image_url }) {
     const { data: created, error } = await supabase
-      .from("motifs")
-      .insert({ ...data, image_url: imageUrl })
+      .from("gallery")
+      .insert({ title, description, image_url })
       .select()
       .single();
     if (error) throw error;
     return created;
   }
 
-  async updateMotif(id, payload) {
-    const { data: oldMotif, error: fetchErr } = await supabase
-      .from("motifs")
+  async updateGalleryItem(id, payload) {
+    const { data: oldItem, error: fetchErr } = await supabase
+      .from("gallery")
       .select("*")
       .eq("id", id)
       .single();
@@ -56,19 +59,20 @@ class MotifService {
 
     if (payload.image instanceof File) {
       newPayload.image_url = await this.uploadImage(payload.image);
-      await this.deleteFileFromUrl(oldMotif.image_url);
+      await this.deleteFileFromUrl(oldItem.image_url);
     } else if (payload.image_url) {
       newPayload.image_url = payload.image_url;
-      await this.deleteFileFromUrl(oldMotif.image_url);
+      await this.deleteFileFromUrl(oldItem.image_url);
     }
 
-    const keysToUpdate = Object.keys(payload).filter(k => k !== "image" && k !== "image_url");
-    keysToUpdate.forEach(key => newPayload[key] = payload[key]);
+    Object.keys(payload)
+      .filter((key) => key !== "image" && key !== "image_url")
+      .forEach((key) => (newPayload[key] = payload[key]));
 
-    if (Object.keys(newPayload).length === 0) return oldMotif;
+    if (Object.keys(newPayload).length === 0) return oldItem;
 
     const { data, error } = await supabase
-      .from("motifs")
+      .from("gallery")
       .update(newPayload)
       .eq("id", id)
       .select()
@@ -77,19 +81,19 @@ class MotifService {
     return data;
   }
 
-  async deleteMotif(id) {
-    const { data: motif, error: fetchErr } = await supabase
-      .from("motifs")
+  async deleteGalleryItem(id) {
+    const { data: item, error: fetchErr } = await supabase
+      .from("gallery")
       .select("*")
       .eq("id", id)
       .single();
     if (fetchErr) throw fetchErr;
 
-    await this.deleteFileFromUrl(motif?.image_url);
+    await this.deleteFileFromUrl(item?.image_url);
 
-    const { error } = await supabase.from("motifs").delete().eq("id", id);
+    const { error } = await supabase.from("gallery").delete().eq("id", id);
     if (error) throw error;
   }
 }
 
-export default new MotifService();
+export default new GalleryService();

@@ -1,18 +1,31 @@
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import DragDropUpload from "./DragDropUpload";
-import TextareaInput from "../TextareaInput";
 import TextInput from "../TextInput";
+import TextareaInput from "../TextareaInput";
+import TextEditor from "../TextEditor";
 
-const MotifForm = ({ onSubmit, loading }) => {
+const ArtikelForm = ({ onSubmit, loading }) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
+    author: "Unknown",
     image: null,
+    slug: "",
   });
 
   const handleInputChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    let newForm = { ...form, [field]: value };
+
+    if (field === "title") {
+      newForm.slug = value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
+    }
+
+    setForm(newForm);
   };
 
   const handleFileSelect = (file) => {
@@ -26,50 +39,63 @@ const MotifForm = ({ onSubmit, loading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSubmit(form);
-    setForm({ title: "", description: "", image: null });
+    setForm({ title: "", description: "", author: "", image: null, slug: "" });
   };
-
-  // const isFormValid = form.title.trim() && form.description.trim();
 
   return (
     <div className="bg-black rounded-xl border border-gray-500/[0.5] overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-800 bg-gradient-to-r from-purple-900/20 to-blue-900/20">
         <h2 className="text-xl font-bold text-white flex items-center space-x-2">
           <Plus className="w-5 h-5" />
-          <span>Tambah Motif Baru</span>
+          <span>Tambah Artikel Baru</span>
         </h2>
         <p className="text-gray-400 text-sm mt-1">
-          Buat motif batik baru untuk koleksi Anda
+          Tambah artikel baru untuk koleksi galeri Anda
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        <div>
+        <div className="grid grid-cols-2 gap-4">
           <TextInput
-            label="Judul Motif"
+            label="Judul"
             value={form.title}
             onChange={(val) => handleInputChange("title", val)}
-            placeholder="Masukkan nama motif (harus unik)"
+            placeholder="Masukkan judul artikel"
+            required
+          />
+
+          <TextInput
+            label="Slug"
+            value={form.slug}
+            onChange={(val) => handleInputChange("slug", val)}
+            placeholder="Slug artikel (otomatis dari judul)"
+            required
+            readOnly
+          />
+
+          <TextInput
+            label="Author"
+            value={form.author}
+            onChange={(val) => handleInputChange("author", val)}
+            placeholder="Masukkan nama author"
             required
           />
         </div>
 
-        <div>
-          <TextareaInput
-            label="Deskripsi"
-            value={form.description}
-            onChange={(val) => handleInputChange("description", val)}
-            placeholder="Ceritakan tentang motif ini, sejarah, filosofi, atau makna khususnya..."
-            rows={4}
-            required
-          />
-        </div>
+        <TextEditor
+          label="description"
+          value={form.description}
+          onChange={(val) => handleInputChange("description", val)}
+          placeholder="Masukkan deskripsi artikel"
+          required
+        />
 
         <DragDropUpload
           onFileSelect={handleFileSelect}
           selectedFile={form.image}
           onRemove={handleRemoveFile}
           isRequired={true}
+          maxFileSizeMB={1}
           accept="image/jpeg,image/png,image/gif"
         />
 
@@ -87,7 +113,7 @@ const MotifForm = ({ onSubmit, loading }) => {
             ) : (
               <>
                 <Plus className="w-4 h-4" />
-                <span>Tambah Motif</span>
+                <span>Tambah Artikel</span>
               </>
             )}
           </button>
@@ -97,4 +123,4 @@ const MotifForm = ({ onSubmit, loading }) => {
   );
 };
 
-export default MotifForm;
+export default ArtikelForm;

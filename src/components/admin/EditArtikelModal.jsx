@@ -1,60 +1,82 @@
-import { Loader2, Save, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import DragDropUpload from './DragDropUpload';
+import { Loader2, Save, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import DragDropUpload from "./DragDropUpload";
+import TextInput from "../TextInput";
+import TextEditor from "../TextEditor";
 
-const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
+const EditArtikelModal = ({ isOpen, onClose, artikel, onSave, loading }) => {
   const [form, setForm] = useState({
-    title: '',
-    description: '',
+    title: "",
+    slug: "",
+    author: "",
+    description: "",
     image: null,
-    currentImageUrl: ''
+    currentImageUrl: "",
   });
 
   useEffect(() => {
-    if (motif) {
+    if (artikel && isOpen) {
       setForm({
-        title: motif.title || '',
-        description: motif.description || '',
+        title: artikel.title || "",
+        slug: artikel.slug || "",
+        author: artikel.author || "",
+        description: artikel.description || "",
         image: null,
-        currentImageUrl: motif.image_url || ''
+        currentImageUrl: artikel.image_url || "",
       });
     }
-  }, [motif]);
+  }, [artikel, isOpen]);
 
   const handleInputChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => {
+      const updated = { ...prev, [field]: value };
+
+      if (field === "title") {
+        updated.slug = value
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "");
+      }
+
+      return updated;
+    });
   };
 
   const handleFileSelect = (file) => {
-    setForm(prev => ({ ...prev, image: file }));
+    setForm((prev) => ({ ...prev, image: file }));
   };
 
   const handleRemoveFile = () => {
-    setForm(prev => ({ ...prev, image: null }));
+    setForm((prev) => ({ ...prev, image: null }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const updateData = {
       title: form.title,
+      slug: form.slug,
+      author: form.author,
       description: form.description,
-      newImage: form.image
+      image_url: form.image,
     };
-
-    await onSave(motif.id, updateData);
+    await onSave(artikel.id, updateData);
   };
 
-  // const isFormValid = form.title.trim() && form.description.trim();
-
-  if (!isOpen || !motif) return null;
+  if (!isOpen || !artikel) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onClick={onClose}></div>
+      <div
+        className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+        onClick={onClose}
+      ></div>
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative bg-black rounded-xl border border-gray-500/[0.5] shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 bg-black border-b border-gray-500/[0.5] px-6 py-4 flex items-center justify-between z-50">
-            <h2 className="text-xl font-bold text-white">Edit Motif</h2>
+            <h2 className="text-xl font-bold text-white">
+              Edit Artikel | {form.title}
+            </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-300 transition-colors"
@@ -64,33 +86,40 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Judul Motif <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Masukkan nama motif (harus unik)"
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="Judul"
                 value={form.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                onChange={(val) => handleInputChange("title", val)}
+                placeholder="Masukkan judul artikel"
+                required
+              />
 
+              <TextInput
+                label="Slug"
+                value={form.slug}
+                onChange={(val) => handleInputChange("slug", val)}
+                placeholder="Slug artikel"
+                required
+                readOnly
+              />
+
+              <TextInput
+                label="Author"
+                value={form.author}
+                onChange={(val) => handleInputChange("author", val)}
+                placeholder="Masukkan nama author"
+                required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Deskripsi <span className="text-red-400">*</span>
-              </label>
-              <textarea
-                placeholder="Ceritakan tentang motif ini, sejarah, filosofi, atau makna khususnya..."
-                value={form.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={4}
-                className="w-full px-4 py-3 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-
-              />
-            </div>
+            <TextEditor
+              label="Deskripsi Artikel"
+              value={form.description}
+              onChange={(val) => handleInputChange("description", val)}
+              placeholder="Masukkan deskripsi artikel"
+              required
+            />
 
             {form.currentImageUrl && !form.image && (
               <div>
@@ -114,7 +143,9 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                {form.currentImageUrl ? 'Ganti Gambar (opsional)' : 'Upload Gambar'}
+                {form.currentImageUrl
+                  ? "Ganti Gambar (opsional)"
+                  : "Upload Gambar"}
               </label>
               <DragDropUpload
                 onFileSelect={handleFileSelect}
@@ -161,4 +192,4 @@ const EditMotifModal = ({ isOpen, onClose, motif, onSave, loading }) => {
   );
 };
 
-export default EditMotifModal;
+export default EditArtikelModal;

@@ -1,12 +1,16 @@
 import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "../layout/MainLayout";
-import Index from "../pages/LandingPage/Index";
-import MotifPage from "../pages/LandingPage/Motif/MotifPage";
-import { GalleryPage } from "../pages/LandingPage/Gallery/GalleryPage";
-import BlogPage from "../pages/LandingPage/Blogs/BlogPage";
-import MotifBatik from "../pages/admin/motif/Index";
-import Home from "../pages/LandingPage/Model_3D";
 import AdminLayout from "../layout/AdminLayout";
+import MainLayout from "../layout/MainLayout";
+import ArtikelDashboard from "../pages/admin/artikel";
+import GalleryDashboard from "../pages/admin/galery";
+import ModelDashboard from "../pages/admin/model";
+import MotifBatik from "../pages/admin/motif/Index";
+import BlogPage from "../pages/LandingPage/Blogs/BlogPage";
+import { GalleryPage } from "../pages/LandingPage/Gallery/GalleryPage";
+import Index from "../pages/LandingPage/Index";
+import Home from "../pages/LandingPage/Model_3D";
+import MotifPage from "../pages/LandingPage/Motif/MotifPage";
+import Tutorial from "../pages/tutorial";
 
 export const router = createBrowserRouter([
   {
@@ -26,7 +30,7 @@ export const router = createBrowserRouter([
         element: <GalleryPage />,
       },
       {
-        path: "/blogs",
+        path: "/artikel",
         element: <BlogPage />,
       },
     ],
@@ -39,6 +43,18 @@ export const router = createBrowserRouter([
         path: "motif-batik",
         element: <MotifBatik />,
       },
+      {
+        path: "gallery",
+        element: <GalleryDashboard />,
+      },
+      {
+        path: "artikel",
+        element: <ArtikelDashboard />,
+      },
+      {
+        path: "models",
+        element: <ModelDashboard />,
+      },
     ],
   },
   {
@@ -47,7 +63,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/tutorial",
-    element: <Index />,
+    element: <Tutorial />,
   },
   {
     path: "*",

@@ -101,14 +101,14 @@ export default function HorizontalCardRunner({ items = [] }) {
                 className="w-80 shrink-0 rounded-xl overflow-hidden border border-white/20 bg-[#141414] shadow-lg"
               >
                 <img
-                  src={item.img}
+                  src={item.image_url}
                   alt={item.title}
                   className="h-40 w-full object-cover"
                 />
                 <div className="p-3 space-y-1">
                   <h3 className="text-white font-semibold">{item.title}</h3>
                   <p className="text-white/70 text-sm line-clamp-2">
-                    {item.desc}
+                    {item.description}
                   </p>
                 </div>
               </div>

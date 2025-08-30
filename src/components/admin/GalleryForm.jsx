@@ -1,10 +1,10 @@
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import DragDropUpload from "./DragDropUpload";
-import TextareaInput from "../TextareaInput";
 import TextInput from "../TextInput";
+import TextareaInput from "../TextareaInput";
 
-const MotifForm = ({ onSubmit, loading }) => {
+const GalleryForm = ({ onSubmit, loading }) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -26,30 +26,30 @@ const MotifForm = ({ onSubmit, loading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSubmit(form);
+    console.log(form);
+    
     setForm({ title: "", description: "", image: null });
   };
-
-  // const isFormValid = form.title.trim() && form.description.trim();
 
   return (
     <div className="bg-black rounded-xl border border-gray-500/[0.5] overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-800 bg-gradient-to-r from-purple-900/20 to-blue-900/20">
         <h2 className="text-xl font-bold text-white flex items-center space-x-2">
           <Plus className="w-5 h-5" />
-          <span>Tambah Motif Baru</span>
+          <span>Tambah Gambar Baru</span>
         </h2>
         <p className="text-gray-400 text-sm mt-1">
-          Buat motif batik baru untuk koleksi Anda
+          Tambah gambar baru untuk koleksi galeri anda
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div>
           <TextInput
-            label="Judul Motif"
+            label="Judul"
             value={form.title}
             onChange={(val) => handleInputChange("title", val)}
-            placeholder="Masukkan nama motif (harus unik)"
+            placeholder="Masukkan judul gambar"
             required
           />
         </div>
@@ -59,8 +59,8 @@ const MotifForm = ({ onSubmit, loading }) => {
             label="Deskripsi"
             value={form.description}
             onChange={(val) => handleInputChange("description", val)}
-            placeholder="Ceritakan tentang motif ini, sejarah, filosofi, atau makna khususnya..."
-            rows={4}
+            placeholder="Masukkan deskripsi gambar"
+            rows={3}
             required
           />
         </div>
@@ -87,7 +87,7 @@ const MotifForm = ({ onSubmit, loading }) => {
             ) : (
               <>
                 <Plus className="w-4 h-4" />
-                <span>Tambah Motif</span>
+                <span>Tambah Gambar</span>
               </>
             )}
           </button>
@@ -97,4 +97,4 @@ const MotifForm = ({ onSubmit, loading }) => {
   );
 };
 
-export default MotifForm;
+export default GalleryForm;
