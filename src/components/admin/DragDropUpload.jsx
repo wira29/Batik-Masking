@@ -7,7 +7,7 @@ const DragDropUpload = ({
   onRemove,
   isRequired = false,
   maxFileSizeMB = 5,
-  accept = "*", // default izinkan semua
+  accept = "*",
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState("");
@@ -16,7 +16,6 @@ const DragDropUpload = ({
   const handleFile = (file) => {
     setError("");
 
-    // validasi ekstensi & mime
     if (accept !== "*" && accept !== "") {
       const allowedTypes = accept.split(",").map((a) => a.trim().toLowerCase());
       const fileType = file.type?.toLowerCase() || "";
@@ -35,7 +34,6 @@ const DragDropUpload = ({
       }
     }
 
-    // validasi size
     if (file.size / 1024 / 1024 > maxFileSizeMB) {
       setError(`File terlalu besar! Maksimal ${maxFileSizeMB} MB`);
       return;
@@ -49,7 +47,7 @@ const DragDropUpload = ({
     if (imageTypes.includes(file.type)) {
       return URL.createObjectURL(file);
     }
-    return null; // kalau bukan image
+    return null;
   };
 
   const shortenFileName = (name) =>

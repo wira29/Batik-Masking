@@ -1,10 +1,20 @@
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
+import { z } from "zod";
 import DragDropUpload from "./DragDropUpload";
 import TextareaInput from "../TextareaInput";
 import TextInput from "../TextInput";
 
+const motifSchema = z.object({
+  title: z.string().min(3, "Judul minimal 3 karakter"),
+  description: z.string().min(10, "Deskripsi minimal 10 karakter"),
+  image: z.any().refine((file) => file instanceof File, {
+    message: "File gambar wajib diunggah",
+  }),
+});
+
 const MotifForm = ({ onSubmit, loading }) => {
+  const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -25,11 +35,23 @@ const MotifForm = ({ onSubmit, loading }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await onSubmit(form);
-    setForm({ title: "", description: "", image: null });
-  };
 
-  // const isFormValid = form.title.trim() && form.description.trim();
+    const result = motifSchema.safeParse(form);
+
+    if (!result.success) {
+      const formatted = result.error.format();
+      setErrors({
+        title: formatted.title?._errors[0],
+        description: formatted.description?._errors[0],
+        image: formatted.image?._errors[0],
+      });
+      return;
+    }
+
+    await onSubmit(result.data);
+    setForm({ title: "", description: "", image: null });
+    setErrors({});
+  };
 
   return (
     <div className="bg-black rounded-xl border border-gray-500/[0.5] overflow-hidden">
@@ -51,6 +73,7 @@ const MotifForm = ({ onSubmit, loading }) => {
             onChange={(val) => handleInputChange("title", val)}
             placeholder="Masukkan nama motif (harus unik)"
             required
+            error={errors.title}
           />
         </div>
 
@@ -62,6 +85,7 @@ const MotifForm = ({ onSubmit, loading }) => {
             placeholder="Ceritakan tentang motif ini, sejarah, filosofi, atau makna khususnya..."
             rows={4}
             required
+            error={errors.description}
           />
         </div>
 
@@ -69,7 +93,8 @@ const MotifForm = ({ onSubmit, loading }) => {
           onFileSelect={handleFileSelect}
           selectedFile={form.image}
           onRemove={handleRemoveFile}
-          isRequired={true}
+          isRequired
+          error={errors.image}
           accept="image/jpeg,image/png,image/gif"
         />
 

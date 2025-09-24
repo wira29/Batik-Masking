@@ -6,6 +6,7 @@ const TextEditor = ({
   label,
   value,
   onChange,
+  error,
   placeholder = "Tulis sesuatu...",
   required = false,
 }) => {
@@ -13,7 +14,6 @@ const TextEditor = ({
   const quillRef = useRef(null);
   const [isError, setIsError] = useState(false);
 
-  // Inisialisasi Quill
   useEffect(() => {
     if (quillRef.current) return;
 
@@ -32,19 +32,16 @@ const TextEditor = ({
       },
     });
 
-    // Style editor
     q.root.style.backgroundColor = "#0000";
     q.root.style.color = "#ffff";
     q.root.style.minHeight = "200px";
     q.root.style.padding = "0.5rem";
     q.root.style.fontSize = "1rem";
 
-    // Set value awal
     if (value) {
       q.clipboard.dangerouslyPasteHTML(value);
     }
 
-    // Sinkron ke parent
     q.on("text-change", () => {
       const content = q.root.innerHTML;
       onChange(content);
@@ -58,7 +55,6 @@ const TextEditor = ({
     quillRef.current = q;
   }, []);
 
-  // Update Quill saat value parent berubah
   useEffect(() => {
     if (!quillRef.current) return;
     if (value !== quillRef.current.root.innerHTML) {
@@ -80,6 +76,12 @@ const TextEditor = ({
       >
         <div ref={editorRef} />
       </div>
+
+      {error && (
+        <div className="my-2">
+          <span className="text-red-500 text-sm">{error}</span>
+        </div>
+      )}
     </div>
   );
 };

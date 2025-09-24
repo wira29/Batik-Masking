@@ -58,33 +58,12 @@ class MotifDashboard extends React.Component {
   handleSubmit = async (formData) => {
     this.setState({ submitting: true });
     try {
-      let imageUrl = null;
-      if (formData.image)
-        imageUrl = await MotifService.uploadImage(formData.image);
-
-      const motifData = {
-        title: formData.title,
-        description: formData.description,
-        image_url: imageUrl ?? "",
-      };
-      motifSchema.parse(motifData);
-
-      await MotifService.createMotif(motifData);
+      await MotifService.createMotif(formData);
       this.showNotification("Motif berhasil ditambahkan!");
       this.loadMotifs();
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        error.issues.forEach((err) =>
-          this.showNotification(err.message, "error")
-        );
-        return;
-      }
-      this.showNotification(
-        error.message.includes("duplicate")
-          ? "Judul motif sudah ada, gunakan judul yang berbeda"
-          : "Gagal menyimpan motif. Silakan coba lagi.",
-        "error"
-      );
+      console.error(error);
+      this.showNotification("Gagal menyimpan motif", "error");
     } finally {
       this.setState({ submitting: false });
     }
