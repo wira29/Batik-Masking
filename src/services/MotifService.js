@@ -12,7 +12,12 @@ class MotifService {
   }
 
   async uploadImage(file, bucket = "motifs") {
-    const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+    console.log("file", file);
+    const fileName = `${Date.now()}_${file.name.replace(
+      /[^a-zA-Z0-9.-]/g,
+      "_"
+    )}`;
+    console.log("file", file);
     const { error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, { cacheControl: "3600", upsert: false });

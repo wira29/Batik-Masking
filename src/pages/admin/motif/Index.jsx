@@ -1,12 +1,12 @@
 import React from "react";
 import z from "zod";
 import ConfirmModal from "../../../components/admin/ConfirmModal";
+import DataGrid from "../../../components/admin/DataGrid";
 import EditMotifModal from "../../../components/admin/EditMotifModal";
 import MotifForm from "../../../components/admin/MotifForm";
 import Notification from "../../../components/Notification";
 import BlurText from "../../../components/react-bits/BlurText/BlurText";
 import MotifService from "../../../services/MotifService";
-import DataGrid from "../../../components/admin/DataGrid";
 
 const motifSchema = z.object({
   title: z.string().min(1, { message: "Nama wajib diisi" }),

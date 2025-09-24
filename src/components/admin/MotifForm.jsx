@@ -1,8 +1,8 @@
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
-import DragDropUpload from "./DragDropUpload";
 import TextareaInput from "../TextareaInput";
 import TextInput from "../TextInput";
+import DragDropUpload from "./DragDropUpload";
 
 const MotifForm = ({ onSubmit, loading }) => {
   const [form, setForm] = useState({
@@ -25,6 +25,7 @@ const MotifForm = ({ onSubmit, loading }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     await onSubmit(form);
     setForm({ title: "", description: "", image: null });
   };
