@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { Link } from "react-router-dom";
 import dataModel from "../../../assets/data/dataModel.json";
+import LoadingOverlay from "../../../components/LoadingOverlay";
+import LoadingScreen from "../../../components/LoadingScreen";
 import { tutorialSteps } from "../../../tutorial/tutorialSteps";
 import BackgroundImage from "./components/BackgroundImage";
 import CropModal from "./components/CropModal";
@@ -15,8 +17,6 @@ import MotifModal from "./components/MotifModal";
 import ShirtObj from "./components/ShirtObj";
 import SideToolbar from "./components/SideToolbar";
 import URLImage from "./components/URLImage";
-import LoadingScreen from "../../../components/LoadingScreen";
-import LoadingOverlay from "../../../components/LoadingOverlay";
 
 export default function Home() {
   const stageRef = useRef();
@@ -72,7 +72,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const handleWheel = (e) => {};
+    const handleWheel = (e) => { };
 
     window.addEventListener("wheel", handleWheel, { passive: true });
     return () => window.removeEventListener("wheel", handleWheel);
@@ -80,7 +80,10 @@ export default function Home() {
 
   const applyTexture = () => {
     if (!stageRef.current) return;
-    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+    const uri = stageRef.current.toDataURL({
+      pixelRatio: 5, // Tingkatkan dari 5 ke 10 atau lebih
+      mimeType: 'image/png' // PNG untuk kualitas terbaik
+    });
     setStageTexture(uri);
   };
 

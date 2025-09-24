@@ -12,13 +12,18 @@ class MotifService {
   }
 
   async uploadImage(file, bucket = "motifs") {
-    const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+    const fileName = `${Date.now()}_${file.name.replace(
+      /[^a-zA-Z0-9.-]/g,
+      "_"
+    )}`;
     const { error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, { cacheControl: "3600", upsert: false });
     if (error) throw error;
 
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(fileName);
     return urlData.publicUrl;
   }
 
@@ -29,17 +34,23 @@ class MotifService {
     if (!path) return;
 
     const { error } = await supabase.storage.from(bucket).remove([path]);
-    if (error) console.error("❌ Error hapus file:", error.message);
+    if (error) console.error("Error hapus file:", error.message);
     else console.info("File berhasil dihapus:", path);
   }
 
   async createMotif({ image, ...data }) {
+    if (!(image instanceof File)) {
+      throw new Error("File gambar wajib diunggah");
+    }
+
     const imageUrl = await this.uploadImage(image);
+
     const { data: created, error } = await supabase
       .from("motifs")
       .insert({ ...data, image_url: imageUrl })
       .select()
       .single();
+
     if (error) throw error;
     return created;
   }
@@ -62,8 +73,10 @@ class MotifService {
       await this.deleteFileFromUrl(oldMotif.image_url);
     }
 
-    const keysToUpdate = Object.keys(payload).filter(k => k !== "image" && k !== "image_url");
-    keysToUpdate.forEach(key => newPayload[key] = payload[key]);
+    const keysToUpdate = Object.keys(payload).filter(
+      (k) => k !== "image" && k !== "image_url"
+    );
+    keysToUpdate.forEach((key) => (newPayload[key] = payload[key]));
 
     if (Object.keys(newPayload).length === 0) return oldMotif;
 
