@@ -81,7 +81,7 @@ export default function Home() {
   const applyTexture = () => {
     if (!stageRef.current) return;
     const uri = stageRef.current.toDataURL({
-      pixelRatio: 10, // Tingkatkan dari 5 ke 10 atau lebih
+      pixelRatio: 5, // Tingkatkan dari 5 ke 10 atau lebih
       mimeType: 'image/png' // PNG untuk kualitas terbaik
     });
     setStageTexture(uri);
