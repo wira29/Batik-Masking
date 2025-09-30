@@ -1,6 +1,6 @@
 import { Check, Crop, RotateCcw, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Image as KonvaImage, Layer, Rect, Stage } from 'react-konva';
+import { Circle, Image as KonvaImage, Layer, Rect, Stage } from 'react-konva';
 import useImage from 'use-image';
 
 const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
@@ -16,6 +16,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     const [resizeHandle, setResizeHandle] = useState(null);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [originalCropBox, setOriginalCropBox] = useState(null);
+    const [hoveredHandle, setHoveredHandle] = useState(null);
     const stageRef = useRef();
 
     // Initialize crop box when image loads
@@ -33,12 +34,55 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
 
     if (!isOpen) return null;
 
+    const handleSize = 20; // Ukuran handle lingkaran
+    const handleRadius = handleSize / 2;
+
+    const getHandlePositions = () => {
+        return {
+            'nw': { // top-left
+                x: cropBox.x,
+                y: cropBox.y
+            },
+            'ne': { // top-right
+                x: cropBox.x + cropBox.width,
+                y: cropBox.y
+            },
+            'sw': { // bottom-left
+                x: cropBox.x,
+                y: cropBox.y + cropBox.height
+            },
+            'se': { // bottom-right
+                x: cropBox.x + cropBox.width,
+                y: cropBox.y + cropBox.height
+            },
+            'n': { // top
+                x: cropBox.x + cropBox.width / 2,
+                y: cropBox.y
+            },
+            's': { // bottom
+                x: cropBox.x + cropBox.width / 2,
+                y: cropBox.y + cropBox.height
+            },
+            'w': { // left
+                x: cropBox.x,
+                y: cropBox.y + cropBox.height / 2
+            },
+            'e': { // right
+                x: cropBox.x + cropBox.width,
+                y: cropBox.y + cropBox.height / 2
+            }
+        };
+    };
+
+    const isPointInCircle = (point, center, radius) => {
+        const dx = point.x - center.x;
+        const dy = point.y - center.y;
+        return Math.sqrt(dx * dx + dy * dy) <= radius;
+    };
+
     const handleMouseDown = (e) => {
         const pos = e.target.getStage().getPointerPosition();
         const scale = Math.min(600 / img.width, 500 / img.height, 1);
-        const handleSize = 16; // Perbesar area hit detection
-
-        console.log('Mouse down at:', pos); // Debug log
 
         // Konversi posisi mouse ke koordinat image
         const imagePos = {
@@ -46,66 +90,14 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
             y: pos.y / scale
         };
 
-        // Hitung posisi handles dengan toleransi yang lebih besar
-        const handles = {
-            'nw': { // top-left
-                x: cropBox.x - handleSize / 2,
-                y: cropBox.y - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            },
-            'ne': { // top-right
-                x: cropBox.x + cropBox.width - handleSize / 2,
-                y: cropBox.y - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            },
-            'sw': { // bottom-left
-                x: cropBox.x - handleSize / 2,
-                y: cropBox.y + cropBox.height - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            },
-            'se': { // bottom-right
-                x: cropBox.x + cropBox.width - handleSize / 2,
-                y: cropBox.y + cropBox.height - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            },
-            'n': { // top
-                x: cropBox.x + cropBox.width / 2 - handleSize / 2,
-                y: cropBox.y - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            },
-            's': { // bottom
-                x: cropBox.x + cropBox.width / 2 - handleSize / 2,
-                y: cropBox.y + cropBox.height - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            },
-            'w': { // left
-                x: cropBox.x - handleSize / 2,
-                y: cropBox.y + cropBox.height / 2 - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            },
-            'e': { // right
-                x: cropBox.x + cropBox.width - handleSize / 2,
-                y: cropBox.y + cropBox.height / 2 - handleSize / 2,
-                width: handleSize,
-                height: handleSize
-            }
-        };
-
-        // Cek handle mana yang diklik (langsung dengan imagePos)
+        const handlePositions = getHandlePositions();
         let selectedHandle = null;
 
-        for (const [handle, bounds] of Object.entries(handles)) {
-            if (imagePos.x >= bounds.x && imagePos.x <= bounds.x + bounds.width &&
-                imagePos.y >= bounds.y && imagePos.y <= bounds.y + bounds.height) {
+        // Cek handle mana yang diklik (dengan deteksi lingkaran)
+        for (const [handle, center] of Object.entries(handlePositions)) {
+            if (isPointInCircle(imagePos, center, handleRadius + 5)) { // Tambahan 5px untuk toleransi
                 selectedHandle = handle;
-                console.log('Selected handle:', handle); // Debug log
+                console.log('Selected handle:', handle);
                 break;
             }
         }
@@ -129,14 +121,26 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     };
 
     const handleMouseMove = (e) => {
-        if (!isDragging && !isResizing) return;
-
         const pos = e.target.getStage().getPointerPosition();
         const scale = Math.min(600 / img.width, 500 / img.height, 1);
         const imagePos = {
             x: pos.x / scale,
             y: pos.y / scale
         };
+
+        // Update hovered handle untuk visual feedback
+        if (!isDragging && !isResizing) {
+            const handlePositions = getHandlePositions();
+            let hoveredHandle = null;
+
+            for (const [handle, center] of Object.entries(handlePositions)) {
+                if (isPointInCircle(imagePos, center, handleRadius + 5)) {
+                    hoveredHandle = handle;
+                    break;
+                }
+            }
+            setHoveredHandle(hoveredHandle);
+        }
 
         if (isDragging) {
             setCropBox({
@@ -203,6 +207,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
         setIsResizing(false);
         setResizeHandle(null);
         setOriginalCropBox(null);
+        setHoveredHandle(null);
     };
 
     const handleCrop = () => {
@@ -266,6 +271,24 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                     return 'default';
             }
         }
+        if (hoveredHandle) {
+            switch (hoveredHandle) {
+                case 'nw':
+                case 'se':
+                    return 'nw-resize';
+                case 'ne':
+                case 'sw':
+                    return 'ne-resize';
+                case 'n':
+                case 's':
+                    return 'ns-resize';
+                case 'e':
+                case 'w':
+                    return 'ew-resize';
+                default:
+                    return 'default';
+            }
+        }
         return 'default';
     };
 
@@ -282,7 +305,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
     const scale = Math.min(600 / img.width, 500 / img.height, 1);
     const displayWidth = img.width * scale;
     const displayHeight = img.height * scale;
-    const handleSize = 12; // Perbesar handle agar lebih mudah terlihat
+    const handlePositions = getHandlePositions();
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -322,7 +345,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                 {/* Original Image */}
                                 <KonvaImage image={img} />
 
-                                {/* Dark Overlay - Split into 4 rectangles to avoid globalCompositeOperation */}
+                                {/* Dark Overlay - Split into 4 rectangles */}
                                 {/* Top */}
                                 <Rect
                                     x={0}
@@ -330,7 +353,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={img.width}
                                     height={cropBox.y}
                                     fill="black"
-                                    opacity={0.5}
+                                    opacity={0.6}
                                 />
                                 {/* Bottom */}
                                 <Rect
@@ -339,7 +362,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={img.width}
                                     height={img.height - (cropBox.y + cropBox.height)}
                                     fill="black"
-                                    opacity={0.5}
+                                    opacity={0.6}
                                 />
                                 {/* Left */}
                                 <Rect
@@ -348,7 +371,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={cropBox.x}
                                     height={cropBox.height}
                                     fill="black"
-                                    opacity={0.5}
+                                    opacity={0.6}
                                 />
                                 {/* Right */}
                                 <Rect
@@ -357,7 +380,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={img.width - (cropBox.x + cropBox.width)}
                                     height={cropBox.height}
                                     fill="black"
-                                    opacity={0.5}
+                                    opacity={0.6}
                                 />
 
                                 {/* Crop Box Border */}
@@ -367,18 +390,18 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={cropBox.width}
                                     height={cropBox.height}
                                     stroke="white"
-                                    strokeWidth={2}
+                                    strokeWidth={3}
                                     fill="transparent"
                                 />
 
-                                {/* Grid lines inside crop box */}
+                                {/* Grid lines inside crop box (Rule of thirds) */}
                                 <Rect
                                     x={cropBox.x + cropBox.width / 3}
                                     y={cropBox.y}
                                     width={1}
                                     height={cropBox.height}
                                     fill="white"
-                                    opacity={0.5}
+                                    opacity={0.4}
                                 />
                                 <Rect
                                     x={cropBox.x + (cropBox.width * 2) / 3}
@@ -386,7 +409,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={1}
                                     height={cropBox.height}
                                     fill="white"
-                                    opacity={0.5}
+                                    opacity={0.4}
                                 />
                                 <Rect
                                     x={cropBox.x}
@@ -394,7 +417,7 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={cropBox.width}
                                     height={1}
                                     fill="white"
-                                    opacity={0.5}
+                                    opacity={0.4}
                                 />
                                 <Rect
                                     x={cropBox.x}
@@ -402,95 +425,94 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                                     width={cropBox.width}
                                     height={1}
                                     fill="white"
-                                    opacity={0.5}
+                                    opacity={0.4}
                                 />
 
-                                {/* Resize Handles */}
-                                {/* Corner handles */}
-                                <Rect
-                                    x={cropBox.x - handleSize / 2}
-                                    y={cropBox.y - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
-                                <Rect
-                                    x={cropBox.x + cropBox.width - handleSize / 2}
-                                    y={cropBox.y - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
-                                <Rect
-                                    x={cropBox.x - handleSize / 2}
-                                    y={cropBox.y + cropBox.height - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
-                                <Rect
-                                    x={cropBox.x + cropBox.width - handleSize / 2}
-                                    y={cropBox.y + cropBox.height - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
+                                {/* Circle Resize Handles */}
+                                {Object.entries(handlePositions).map(([handleKey, position]) => {
+                                    const isHovered = hoveredHandle === handleKey;
+                                    const isActive = resizeHandle === handleKey;
+                                    const radius = isHovered || isActive ? handleRadius + 2 : handleRadius;
 
-                                {/* Side handles */}
-                                <Rect
-                                    x={cropBox.x + cropBox.width / 2 - handleSize / 2}
-                                    y={cropBox.y - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
-                                <Rect
-                                    x={cropBox.x + cropBox.width / 2 - handleSize / 2}
-                                    y={cropBox.y + cropBox.height - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
-                                <Rect
-                                    x={cropBox.x - handleSize / 2}
-                                    y={cropBox.y + cropBox.height / 2 - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
-                                <Rect
-                                    x={cropBox.x + cropBox.width - handleSize / 2}
-                                    y={cropBox.y + cropBox.height / 2 - handleSize / 2}
-                                    width={handleSize}
-                                    height={handleSize}
-                                    fill="white"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                />
+                                    return (
+                                        <Circle
+                                            key={handleKey}
+                                            x={position.x}
+                                            y={position.y}
+                                            radius={radius}
+                                            fill={isActive ? "#3b82f6" : isHovered ? "#60a5fa" : "white"}
+                                            stroke={isActive ? "#1d4ed8" : isHovered ? "#3b82f6" : "#374151"}
+                                            strokeWidth={2}
+                                            shadowColor="black"
+                                            shadowOffset={{ x: 1, y: 1 }}
+                                            shadowOpacity={0.3}
+                                            shadowBlur={3}
+                                        />
+                                    );
+                                })}
+
+                                {/* Corner Handle Indicators (Small dots inside corner handles) */}
+                                {['nw', 'ne', 'sw', 'se'].map(handleKey => {
+                                    const position = handlePositions[handleKey];
+                                    return (
+                                        <Circle
+                                            key={`${handleKey}-indicator`}
+                                            x={position.x}
+                                            y={position.y}
+                                            radius={3}
+                                            fill="#374151"
+                                            opacity={0.7}
+                                        />
+                                    );
+                                })}
+
+                                {/* Side Handle Indicators (Small lines) */}
+                                {['n', 's'].map(handleKey => {
+                                    const position = handlePositions[handleKey];
+                                    return (
+                                        <Rect
+                                            key={`${handleKey}-indicator`}
+                                            x={position.x - 6}
+                                            y={position.y - 1}
+                                            width={12}
+                                            height={2}
+                                            fill="#374151"
+                                            opacity={0.7}
+                                        />
+                                    );
+                                })}
+
+                                {['w', 'e'].map(handleKey => {
+                                    const position = handlePositions[handleKey];
+                                    return (
+                                        <Rect
+                                            key={`${handleKey}-indicator`}
+                                            x={position.x - 1}
+                                            y={position.y - 6}
+                                            width={2}
+                                            height={12}
+                                            fill="#374151"
+                                            opacity={0.7}
+                                        />
+                                    );
+                                })}
                             </Layer>
                         </Stage>
                     </div>
+                </div>
+
+                {/* Instructions */}
+                <div className="mb-4 text-center">
+                    <p className="text-gray-400 text-sm">
+                        Drag the circles to resize • Click and drag inside the crop area to move • Use grid lines for better composition
+                    </p>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex justify-between items-center">
                     <button
                         onClick={resetCrop}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                     >
                         <RotateCcw size={16} />
                         Reset
@@ -499,13 +521,13 @@ const CropModal = ({ isOpen, onClose, imageData, onCropComplete }) => {
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors"
+                            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleCrop}
-                            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-lg"
                         >
                             <Check size={16} />
                             Apply Crop

@@ -99,17 +99,29 @@ export default function Home() {
   };
 
   const handleCropComplete = (croppedImageData) => {
+    const canvasWidth = 616;
+    const canvasHeight = 610;
+
+    // hitung scale agar hasil crop tetap muat di canvas
+    const scale = Math.min(
+      canvasWidth / croppedImageData.width,
+      canvasHeight / croppedImageData.height
+    );
+
     setImages((prev) =>
       prev.map((img) => {
         if (img.id === croppedImageData.id) {
           return {
             ...img,
             ...croppedImageData,
+            scaleX: scale,
+            scaleY: scale,
           };
         }
         return img;
       })
     );
+
     setOpenCrop(false);
     setCropImageData(null);
   };
